@@ -234,14 +234,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .export-contact-btn{font-size:11px;padding:3px 10px;background:transparent;border:1px solid var(--border);border-radius:5px;cursor:pointer;color:var(--muted);font-family:var(--font);white-space:nowrap}
 .export-contact-btn:hover{background:var(--s2);color:var(--text)}
 .copied-flash{color:var(--won);font-size:11px;font-family:var(--mono);display:none}
-
-  .cup-ov{position:absolute;inset:0;background:rgba(255,255,255,.9);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:20}
-  .cup-sp{width:26px;height:26px;border:3px solid #e5e5e5;border-top-color:#111;border-radius:50%;animation:cspin .7s linear infinite}
-  .cup-bw{width:72%;height:5px;background:#e5e5e5;border-radius:3px;overflow:hidden}
-  .cup-bf{height:100%;background:#111;border-radius:3px;transition:width .3s}
-  .cup-lb{font-size:11px;color:#555}
-  @keyframes cspin{to{transform:rotate(360deg)}}
-  </style>
+</style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
 </head>
@@ -264,7 +257,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
     <button class="ni" onclick="showPage('master')"><span style="width:16px;text-align:center">≡</span>Master list</button>
     <button class="ni" onclick="showPage('kanban')"><span style="width:16px;text-align:center">⊞</span>Kanban board</button>
     <button class="ni" onclick="showPage('quotes')"><span style="width:16px;text-align:center">📄</span>Quotations</button>
-  <button class="ni" onclick="showPage('recycle');renderRecycleBin()" title="Recycle Bin"><span style="width:16px;text-align:center">&#128465;</span>Recycle Bin</button>
   </div>
   <div class="ndiv"></div>
   <div class="ns">
@@ -391,8 +383,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
       <div class="fsec-title">Contact information</div>
 
       <!-- Business card upload — Front & Back -->
-      <input type="file" id="card-input-1" class="card-hidden-input" accept="image/*" capture="environment">
-      <input type="file" id="card-input-2" class="card-hidden-input" accept="image/*" capture="environment">
+      <input type="file" id="card-input-1" class="card-hidden-input" accept="image/*">
+      <input type="file" id="card-input-2" class="card-hidden-input" accept="image/*">
       <div class="card-slots">
         <!-- Front -->
         <div>
@@ -446,7 +438,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
         <div class="fgp"><label class="flb">Site location</label><input class="fi" id="flo" placeholder="e.g. Pasir Gudang, Johor"></div>
       </div>
       <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
-        <button class="export-contact-btn" onclick="exportContact()">📋 Copy contact</button><button onclick="recycleCurrentLead()" style="padding:5px 12px;font-size:12px;border:1px solid #fca5a5;border-radius:5px;cursor:pointer;background:#fff0f0;color:#dc2626;font-weight:500">&#128465; Recycle</button>
+        <button class="export-contact-btn" onclick="exportContact()">📋 Copy contact</button>
         <span class="copied-flash" id="copied-flash">✓ Copied!</span>
       </div>
     </div>
@@ -482,7 +474,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
     </div>
 
     <div class="fa">
-      <button class="btn bp" id="save-btn" onclick="showSaving();saveLead().finally(hideSaving)">Save to Google Sheets</button>
+      <button class="btn bp" id="save-btn" onclick="saveLead()">Save to Google Sheets</button>
       <button class="btn" onclick="clearForm()">Clear</button>
       <span class="toast" id="form-toast">✓ Saved to Google Sheets</span>
     </div>
@@ -598,7 +590,7 @@ function renderDash(){
   var won=leads.filter(function(l){return lv(l,'Status')==='Won';}),od=leads.filter(isOD);
   var arc=leads.filter(function(l){return parseInt(lv(l,'Follow-up count')||0)>=2&&isActive(l);});
   var d2=leads.filter(function(l){return lv(l,'Division')==='Div 2'&&isActive(l);});
-  var tot=leads.filter(function(l){return lv(l,'Status')!=='Archived'&&lv(l,'Deleted')!=='1';});
+  var tot=leads.filter(function(l){return lv(l,'Status')!=='Archived';});
   var qn=leads.filter(function(l){return lv(l,'Quotation no.');}).length;
 
   document.getElementById('dash-metrics').innerHTML=[
@@ -655,71 +647,12 @@ function renderDash(){
 
   var hl=leads.filter(function(l){return lv(l,'Priority')==='Hot'&&isActive(l);});
   document.getElementById('dash-hot').innerHTML='<thead><tr><th>Client</th><th>Solution</th><th>Status</th><th>Assigned</th><th>Quote no.</th><th>Notes</th></tr></thead><tbody>'+hl.map(function(l){
-    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'<td class="del-btn" data-id="'+lv(l,'ID')+'" data-nm="'+lv(l,'Client name').replace(/"/g,'&quot;')+'" title="Recycle" style="width:34px;text-align:center;cursor:pointer;color:#ccc;font-size:14px" onmouseover="this.style.color='#e53e3e'" onmouseout="this.style.color='#ccc'">&#128465;</td></tr>';
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'</td></tr>';
   }).join('')+'</tbody>';
 }
 
 // ── MASTER LIST ───────────────────────────────────────
 function setMF(f,btn){mf=f;document.querySelectorAll('#mf .fbt').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderMaster();}
-function softDeleteLead(id,name){
-  if(!confirm("Move to Recycle Bin?"))return;
-  var lead=leads.find(function(l){return lv(l,"ID")===String(id);});
-  if(!lead)return;
-  lead["Deleted"]="1";
-  fetch(API+"?action=updateLead&data="+encodeURIComponent(JSON.stringify(lead)))
-    .then(function(r){return r.json();})
-    .then(function(){leads=leads.map(function(l){return lv(l,"ID")===String(id)?lead:l;});renderMaster();showToast(name+" moved to Recycle Bin");});
-}
-function restoreLead(id,name){
-  var lead=leads.find(function(l){return lv(l,"ID")===String(id);});
-  if(!lead)return;
-  lead["Deleted"]="";
-  fetch(API+"?action=updateLead&data="+encodeURIComponent(JSON.stringify(lead)))
-    .then(function(r){return r.json();})
-    .then(function(){leads=leads.map(function(l){return lv(l,"ID")===String(id)?lead:l;});renderRecycleBin();showToast(name+" restored");});
-}
-function permanentDeleteLead(id,name){
-  if(!confirm("Permanently delete? Cannot be undone."))return;
-  fetch(API+"?action=deleteLead&data="+encodeURIComponent(JSON.stringify({ID:id})))
-    .then(function(r){return r.json();})
-    .then(function(res){
-      if(!res.ok){alert("Error: "+(res.error||"Delete failed"));return;}
-      leads=leads.filter(function(l){return lv(l,"ID")!==String(id);});
-      renderRecycleBin();showToast(name+" permanently deleted");
-    });
-}
-function renderRecycleBin(){
-  var cont=document.getElementById("page-recycle");
-  if(!cont)return;
-  var del=leads.filter(function(l){return lv(l,"Deleted")==="1";});
-  if(!del.length){cont.innerHTML="<div style=\"padding:60px;text-align:center;color:#aaa\"><div style=\"font-size:40px\">&#128465;</div><p>Recycle Bin is empty</p></div>";return;}
-  var h="<div style=\"padding:20px\">";
-  h+="<h2 style=\"font-size:17px;font-weight:700;margin-bottom:16px\">&#128465; Recycle Bin <span style=\"font-size:12px;font-weight:400;color:#888\">"+del.length+" item"+(del.length>1?"s":"")+"</span></h2>";
-  h+="<table style=\"width:100%;border-collapse:collapse\"><thead><tr style=\"border-bottom:2px solid #eee\">";
-  h+="<th style=\"text-align:left;padding:8px 10px;font-size:11px;color:#999\">COMPANY</th>";
-  h+="<th style=\"text-align:left;padding:8px 10px;font-size:11px;color:#999\">CONTACT</th>";
-  h+="<th style=\"text-align:left;padding:8px 10px;font-size:11px;color:#999\">STATUS</th>";
-  h+="<th></th></tr></thead><tbody>";
-  del.forEach(function(l){
-    var id=lv(l,"ID");var nm=lv(l,"Client name");
-    h+="<tr style=\"border-bottom:1px solid #f0f0f0\">";
-    h+="<td style=\"padding:9px 10px;font-weight:600\">"+nm+"</td>";
-    h+="<td style=\"padding:9px 10px;color:#666\">"+lv(l,"Contact name")+"</td>";
-    h+="<td style=\"padding:9px 10px\"><span style=\"background:#f5f5f5;padding:2px 8px;border-radius:4px;font-size:12px\">"+lv(l,"Status")+"</span></td>";
-    h+="<td style=\"padding:9px 10px;text-align:right\">";
-    h+="<button data-action=\"restore\" data-id=\""+id+"\" data-nm=\""+nm.replace(/"/g,"&quot;")+"\" style=\"padding:4px 10px;font-size:12px;border:1px solid #ccc;border-radius:4px;cursor:pointer;margin-right:6px\">&#8617; Restore</button>";
-    h+="<button data-action=\"delforever\" data-id=\""+id+"\" data-nm=\""+nm.replace(/"/g,"&quot;")+"\" style=\"padding:4px 10px;font-size:12px;border:1px solid #fca5a5;border-radius:4px;cursor:pointer;background:#fff5f5;color:#dc2626\">&#128465; Delete Forever</button>";
-    h+="</td></tr>";
-  });
-  h+="</tbody></table></div>";
-  cont.innerHTML=h;
-  cont.onclick=function(e){
-    var btn=e.target.closest("[data-action]");if(!btn)return;
-    var act=btn.dataset.action,id=btn.dataset.id,nm=btn.dataset.nm;
-    if(act==="restore")restoreLead(id,nm);
-    if(act==="delforever")permanentDeleteLead(id,nm);
-  };
-}
 function renderMaster(){
   var q=(document.getElementById('msearch')?.value||'').toLowerCase();
   var f=leads.filter(function(l){return lv(l,'Status')!=='Archived';});
@@ -893,9 +826,6 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 function closeMO(e){if(e.target===document.getElementById('modal'))closeModal();}
 
 // ── NEW LEAD ──────────────────────────────────────────
-function showSaving(){var b=document.querySelector("button[onclick*=saveLead]");if(b){b.disabled=true;b._t=b.innerHTML;b.innerHTML="Saving...";}}
-function hideSaving(){var b=document.querySelector("button[onclick*=saveLead]");if(b){b.disabled=false;b.innerHTML=b._t||"Save to Google Sheets";}document.querySelectorAll(".cup-ov").forEach(function(e){e.remove();});}
-function showCardUpload(el,cur,tot){if(!el)return;el.style.position="relative";var o=el.querySelector(".cup-ov");if(o)o.remove();var p=Math.round(cur/tot*100);var d=document.createElement("div");d.className="cup-ov";d.innerHTML="<div class=\"cup-sp\"></div><div class=\"cup-bw\"><div class=\"cup-bf\" style=\"width:"+p+"%\"></div></div><div class=\"cup-lb\">Uploading "+cur+" of "+tot+"</div>";el.appendChild(d);}
 async function saveLead(){
   var name=document.getElementById('fn').value.trim();
   if(!name){alert('Please enter a client name.');return;}
@@ -937,11 +867,11 @@ async function saveLead(){
       try{
         var links = [];
         if(cardDataURL){
-          var _s1=document.querySelectorAll(".card-slot")[0];showCardUpload(_s1,1,2);var l1 = await uploadCardToDrive(cardDataURL, lead['Client name'], lead['Contact name'], 1);
+          var l1 = await uploadCardToDrive(cardDataURL, lead['Client name'], lead['Contact name'], 1);
           if(l1) links.push(l1);
         }
         if(cardDataURL2){
-          var _s2=document.querySelectorAll(".card-slot")[1];showCardUpload(_s2,2,2);var l2 = await uploadCardToDrive(cardDataURL2, lead['Client name'], lead['Contact name'], 2);
+          var l2 = await uploadCardToDrive(cardDataURL2, lead['Client name'], lead['Contact name'], 2);
           if(l2) links.push(l2);
         }
         if(links.length) lead['Business card'] = links.join(' | ');
@@ -1286,7 +1216,13 @@ async function extractCardData(){
 
 
 // ── GOOGLE DRIVE UPLOAD (via Apps Script) ────────────────
-async function uploadCardToDrive(base64Data, filename, mimeType) {
+async function uploadCardToDrive(dataURL, clientName, contactName, index) {
+    // Pre-strip data URL prefix so Apps Script receives clean base64
+    const base64Data = dataURL.indexOf(',') !== -1 ? dataURL.split(',')[1] : dataURL;
+    const year = new Date().getFullYear();
+    const safe = s => String(s || '').replace(/[\\/:*?"<>|]/g, '').trim() || 'Unknown';
+    const filename = year + ' - ' + safe(clientName) + ' - ' + safe(contactName) + ' (' + index + ').jpg';
+    
     const response = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1294,7 +1230,7 @@ async function uploadCardToDrive(base64Data, filename, mimeType) {
         action: 'uploadCard',
         base64Data: base64Data,
         filename: filename,
-        mimeType: mimeType || 'image/jpeg'
+        mimeType: 'image/jpeg'
       })
     });
     const result = await response.json();
@@ -1317,7 +1253,7 @@ function exportContact(){
         lv(lead,'Job title'),
         lv(lead,'Email')
       ].filter(Boolean);
-      copyToClipboard(parts.join('\n'), 'copied-flash-modal');
+      copyToClipboard(parts.join(', '), 'copied-flash-modal');
       return;
     }
   }
@@ -1359,13 +1295,6 @@ function fallbackCopy(text, cb){
   document.body.removeChild(ta);
 }
 
-
-function recycleCurrentLead(){
-  if(!curId)return;
-  var l=leads.find(function(x){return lv(x,"ID")===String(curId);});
-  if(!l)return;
-  softDeleteLead(curId, lv(l,"Client name"));
-}
 </script>
 
 <!-- GLOBAL EDIT MODAL -->
@@ -1427,6 +1356,5 @@ function recycleCurrentLead(){
     <span class="mob-nav-icon">☰</span>More
   </button>
 </div>
-<div id="page-recycle" class="page" style="display:none"></div>
 </body>
 </html>
