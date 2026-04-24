@@ -264,7 +264,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
     <button class="ni" onclick="showPage('master')"><span style="width:16px;text-align:center">≡</span>Master list</button>
     <button class="ni" onclick="showPage('kanban')"><span style="width:16px;text-align:center">⊞</span>Kanban board</button>
     <button class="ni" onclick="showPage('quotes')"><span style="width:16px;text-align:center">📄</span>Quotations</button>
-  <button class="ni" onclick="showPage('recycle')" title="Recycle Bin"><span style="width:16px;text-align:center">🗑</span>Recycle Bin</button>
+  <button class="ni" onclick="showPage('recycle');renderRecycleBin()" title="Recycle Bin"><span style="width:16px;text-align:center">🗑</span>Recycle Bin</button>
   </div>
   <div class="ndiv"></div>
   <div class="ns">
@@ -655,7 +655,7 @@ function renderDash(){
 
   var hl=leads.filter(function(l){return lv(l,'Priority')==='Hot'&&isActive(l);});
   document.getElementById('dash-hot').innerHTML='<thead><tr><th>Client</th><th>Solution</th><th>Status</th><th>Assigned</th><th>Quote no.</th><th>Notes</th></tr></thead><tbody>'+hl.map(function(l){
-    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'</td></tr>';
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'<td onclick="event.stopPropagation();softDeleteLead(''+lv(l,'ID')+'',''+lv(l,'Client name')+'')" title="Move to Recycle Bin" style="width:36px;text-align:center;cursor:pointer;color:#ddd;font-size:15px;padding:0 6px;vertical-align:middle" onmouseover="this.style.color='#e53e3e'" onmouseout="this.style.color='#ddd'">🗑</td></tr>';
   }).join('')+'</tbody>';
 }
 
@@ -689,6 +689,7 @@ async function restoreLead(id, name){
 async function permanentDeleteLead(id, name){
   if(!confirm('Permanently delete "'+name+'"?\nThis cannot be undone.')) return;
   try{
+    // Note: requires deleteLead in Apps Script (see README)
     const resp=await fetch(API+'?action=deleteLead&data='+encodeURIComponent(JSON.stringify({ID:id})));
     const result=await resp.json();
     if(!result.ok) throw new Error(result.error||'Delete failed');
@@ -699,7 +700,7 @@ async function permanentDeleteLead(id, name){
 }
 function renderRecycleBin(){
   const deleted=leads.filter(l=>lv(l,'Deleted')==='1');
-  const cont=document.getElementById('recycle');
+  const cont=document.getElementById('page-recycle');
   if(!cont) return;
   if(!deleted.length){
     cont.innerHTML='<div style="padding:60px 20px;text-align:center;color:#aaa"><div style="font-size:48px;margin-bottom:12px">🗑</div><div style="font-size:15px">Recycle Bin is empty</div></div>';
@@ -1417,6 +1418,7 @@ function fallbackCopy(text, cb){
 <!-- CUSTOM FILTER PAGE -->
 <div class="page" id="page-custom-filter">
   <div class="ph"><div><div class="pt">Custom filter</div><div class="ps">Session only · resets on refresh</div></div><button class="cf-reset" onclick="resetCF()">↺ Reset</button></div>
+<div id="page-recycle" class="page" style="display:none"></div>
   <div style="padding:0 22px 14px">
     <div class="cf-row">
       <div><label class="el">Status</label><select class="cf-sel" id="cf-status" onchange="renderCF()"><option value="">All statuses</option><option>New</option><option>Qualifying</option><option>Site visit scheduled</option><option>Site visit done</option><option>Proposal</option><option>Quoted</option><option>Won</option><option>Lost</option></select></div>
