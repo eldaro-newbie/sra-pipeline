@@ -1165,7 +1165,7 @@ function removeCard(slot){
 }
 
 // ── GEMINI OCR ───────────────────────────────────────────
-var GEMINI_KEY = 'AIzaSyBEnQ1LWkmX87l9k2kh2IWHlVFYzbGClsU';
+var GEMINI_KEY = 'AIzaSyDPUsuE6Fgml9jUCczXz2mikd5SEMU0YF0';
 
 async function extractCardData(){
   if(!cardDataURL){ alert('Please upload a business card first.'); return; }
@@ -1196,11 +1196,21 @@ async function extractCardData(){
       { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }
     );
     var data = await resp.json();
+    // Check for API errors (quota, auth etc)
+    if(data.error){
+      var code = data.error.code;
+      if(code===429) throw new Error('429 rate limit');
+      throw new Error(data.error.message || 'API error '+code);
+    }
     var text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if(!text) throw new Error('No response from Gemini');
 
-    // Parse JSON from response
+    // Parse JSON from response — handle markdown code blocks
     var clean = text.replace(/```json|```/g,'').trim();
-    var info = JSON.parse(clean);
+    // Find JSON object in response
+    var jsonMatch = clean.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Could not parse response');
+    var info = JSON.parse(jsonMatch[0]);
 
     // Auto-fill form fields
     if(info.company) document.getElementById('fn').value = info.company;
@@ -1216,9 +1226,10 @@ async function extractCardData(){
 
   } catch(e) {
     console.error('OCR error:', e);
-    btn.textContent = '✗ Failed — try again';
+    var msg = e.message && e.message.includes('429') ? '✗ Rate limit — wait 1 min' : '✗ Failed — try again';
+    btn.textContent = msg;
     btn.style.background = '#ef4444';
-    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 2500);
+    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 3000);
   }
 }
 
