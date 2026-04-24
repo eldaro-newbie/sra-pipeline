@@ -1,10 +1,4 @@
 <!DOCTYPE html>
-  var _rb=document.getElementById("recycle-lead-btn");
-  if(_rb){
-    var _rl=leads.find(function(l){return lv(l,"ID")===String(id);});
-    _rb.dataset.lid=id;
-    _rb.dataset.lnm=_rl?lv(_rl,"Client name"):"";
-  }
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -452,7 +446,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
         <div class="fgp"><label class="flb">Site location</label><input class="fi" id="flo" placeholder="e.g. Pasir Gudang, Johor"></div>
       </div>
       <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
-        <button class="export-contact-btn" onclick="exportContact()">📋 Copy contact</button><button id="recycle-lead-btn" style="padding:5px 12px;font-size:12px;border:1px solid #fca5a5;border-radius:5px;cursor:pointer;background:#fff0f0;color:#dc2626;font-weight:500" onclick="softDeleteLead(this.dataset.lid, this.dataset.lnm)">🗑 Recycle</button>
+        <button class="export-contact-btn" onclick="exportContact()">📋 Copy contact</button><button onclick="recycleCurrentLead()" style="padding:5px 12px;font-size:12px;border:1px solid #fca5a5;border-radius:5px;cursor:pointer;background:#fff0f0;color:#dc2626;font-weight:500">&#128465; Recycle</button>
         <span class="copied-flash" id="copied-flash">✓ Copied!</span>
       </div>
     </div>
@@ -1365,6 +1359,13 @@ function fallbackCopy(text, cb){
   document.body.removeChild(ta);
 }
 
+
+function recycleCurrentLead(){
+  if(!curId)return;
+  var l=leads.find(function(x){return lv(x,"ID")===String(curId);});
+  if(!l)return;
+  softDeleteLead(curId, lv(l,"Client name"));
+}
 </script>
 
 <!-- GLOBAL EDIT MODAL -->
