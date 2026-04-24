@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Systems R&A — Lead Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -117,17 +117,109 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .tmv{font-size:22px;font-weight:800}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:900px){.metrics{grid-template-columns:repeat(2,1fr)}.two-col,.three-col{grid-template-columns:1fr}.sidebar{width:195px}}
-@media(max-width:640px){.sidebar{display:none}.page{padding:14px}.metrics{grid-template-columns:repeat(2,1fr)}}
+/* mobile handled below */
 .sg{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;padding:14px 16px 4px;user-select:none}
 .sdot2{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:6px}
 .cf-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .cf-sel{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;font-family:var(--font);color:var(--text);outline:none;width:100%}
 .cf-reset{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:12px;font-family:var(--font);color:var(--muted);cursor:pointer}
+
+/* ── MOBILE HAMBURGER BUTTON ── */
+.mob-menu-btn{display:none;position:fixed;top:12px;left:12px;z-index:2000;background:var(--white);border:1px solid var(--border);border-radius:8px;width:40px;height:40px;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh);font-size:18px}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1500}
+.mob-overlay.open{display:block}
+
+/* ── MOBILE SYNC BAR ── */
+@media(max-width:640px){
+  .mob-menu-btn{display:flex}
+  .sync-bar{padding:8px 12px 8px 60px;font-size:11px;gap:6px}
+  .gsearch{width:130px}
+  .gsearch:focus{width:170px}
+
+  /* Sidebar slides in as drawer */
+  .sidebar{position:fixed;left:-240px;top:0;height:100vh;z-index:1600;transition:left .25s ease;width:228px !important;box-shadow:var(--shm)}
+  .sidebar.mob-open{left:0}
+
+  /* Pages */
+  .page{padding:12px}
+  .ph{flex-wrap:wrap;gap:8px;padding:0 0 12px}
+  .pt{font-size:18px}
+
+  /* Metric cards — 2 per row */
+  .metrics{grid-template-columns:repeat(2,1fr);gap:8px}
+  .mc{padding:12px}
+  .mv{font-size:24px}
+
+  /* Dashboard two-col stack */
+  .two-col,.three-col{grid-template-columns:1fr}
+
+  /* Tables — card view on mobile */
+  .tp{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tw{min-width:0}
+
+  /* Master list table — show as cards */
+  .tbl thead{display:none}
+  .tbl tbody tr{display:block;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;padding:0;overflow:hidden}
+  .tbl tbody tr:hover td{background:transparent}
+  .tbl td{display:flex;padding:7px 12px;border-bottom:1px solid var(--border);font-size:13px;align-items:flex-start;gap:8px}
+  .tbl td:last-child{border-bottom:none}
+  .tbl td::before{content:attr(data-label);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;min-width:80px;flex-shrink:0;padding-top:2px;font-family:var(--mono)}
+
+  /* Keep client name row full width and prominent */
+  .tbl td:first-child{background:var(--s2);padding:10px 12px}
+  .tbl td:first-child::before{display:none}
+
+  /* Modal full screen on mobile */
+  .mo{padding-top:0;align-items:flex-end}
+  .modal{width:100%;max-width:100%;margin-bottom:0;border-radius:var(--rl) var(--rl) 0 0;max-height:92vh;overflow-y:auto}
+  .mh{padding:14px 16px}
+  .mb{padding:14px 16px 8px}
+  .mf{padding:12px 16px;position:sticky;bottom:0}
+
+  /* Two-col form fields stack */
+  .two-col-form,.fg{grid-template-columns:1fr !important}
+
+  /* Kanban horizontal scroll */
+  .kb{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;padding-bottom:12px}
+  .kcol{min-width:240px;flex-shrink:0}
+
+  /* Custom filter rows stack */
+  .cf-row{grid-template-columns:1fr;gap:8px}
+
+  /* Bottom nav bar */
+  .mob-nav{display:flex}
+}
+
+/* ── BOTTOM NAV BAR (mobile only) ── */
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);z-index:1400;padding:6px 0 env(safe-area-inset-bottom,6px)}
+.mob-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;cursor:pointer;color:var(--muted);font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;border:none;background:transparent;-webkit-tap-highlight-color:transparent}
+.mob-nav-item.active{color:var(--b2)}
+.mob-nav-icon{font-size:20px;line-height:1}
+
+/* Tablet (641-900px) */
+@media(min-width:641px) and (max-width:900px){
+  .sidebar{width:180px}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .modal{width:560px}
+  .cf-row{grid-template-columns:repeat(2,1fr)}
+}
+
+/* Page bottom padding for mobile nav bar */
+@media(max-width:640px){
+  .page{padding-bottom:80px}
+}
 </style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffffff">
 </head>
 <body>
 <div class="app">
-<nav class="sidebar">
+<!-- Mobile menu overlay -->
+<div class="mob-overlay" id="mob-overlay" onclick="closeMobMenu()"></div>
+<!-- Hamburger button -->
+<button class="mob-menu-btn" onclick="toggleMobMenu()" aria-label="Menu">☰</button>
+
+<nav class="sidebar" id="sidebar">
   <div class="logo">
     <div class="logo-badge">SRA</div>
     <div class="logo-name">Systems R&A (M)</div>
@@ -830,6 +922,58 @@ function resetCF(){
   renderCF();
 }
 
+
+// ── MOBILE MENU ─────────────────────────────────────────
+function toggleMobMenu(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('mob-overlay');
+  var open=sb.classList.toggle('mob-open');
+  ov.classList.toggle('open', open);
+}
+function closeMobMenu(){
+  document.getElementById('sidebar')?.classList.remove('mob-open');
+  document.getElementById('mob-overlay')?.classList.remove('open');
+}
+function setMobNav(btn){
+  document.querySelectorAll('.mob-nav-item').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+
+// ── CLOSE SIDEBAR ON NAV CLICK (mobile) ─────────────────
+(function(){
+  var orig = window.showPage;
+  window.showPage = function(id){
+    orig(id);
+    closeMobMenu();
+  };
+})();
+
+// ── ADD data-label TO TABLE CELLS FOR MOBILE CARD VIEW ──
+function addTableLabels(){
+  document.querySelectorAll('.tbl').forEach(function(tbl){
+    var headers=Array.from(tbl.querySelectorAll('thead th')).map(function(th){return th.textContent.trim();});
+    tbl.querySelectorAll('tbody tr').forEach(function(tr){
+      Array.from(tr.querySelectorAll('td')).forEach(function(td,i){
+        if(headers[i]) td.setAttribute('data-label', headers[i]);
+      });
+    });
+  });
+}
+
+// Patch renderMaster, renderTeam etc to call addTableLabels after rendering
+(function(){
+  var patchFns = ['renderMaster','renderTeam','renderStatusView','renderSourceView','renderCF','renderQuotes'];
+  patchFns.forEach(function(name){
+    var orig = window[name];
+    if(typeof orig==='function'){
+      window[name]=function(){
+        orig.apply(this, arguments);
+        setTimeout(addTableLabels, 50);
+      };
+    }
+  });
+})();
+
 </script>
 
 <!-- GLOBAL EDIT MODAL -->
@@ -874,6 +1018,22 @@ function resetCF(){
     </div>
   </div>
   <div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Status</th><th>Quote no.</th><th>F/U</th><th>Next action</th></tr></thead><tbody id="cf-body"></tbody></table></div></div>
+</div>
+
+<!-- Mobile bottom nav -->
+<div class="mob-nav" id="mob-nav">
+  <button class="mob-nav-item" onclick="showPage('dashboard');setMobNav(this)">
+    <span class="mob-nav-icon">◈</span>Dash
+  </button>
+  <button class="mob-nav-item active" onclick="showPage('master');setMobNav(this)">
+    <span class="mob-nav-icon">≡</span>List
+  </button>
+  <button class="mob-nav-item" onclick="showPage('kanban');setMobNav(this)">
+    <span class="mob-nav-icon">⊞</span>Board
+  </button>
+  <button class="mob-nav-item" onclick="toggleMobMenu()">
+    <span class="mob-nav-icon">☰</span>More
+  </button>
 </div>
 </body>
 </html>
