@@ -388,7 +388,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
       <div class="card-slots">
         <!-- Front -->
         <div>
-          <div class="card-slot-label">Front of card</div>
+          <div class="card-slot-label">Card 1</div>
           <div class="card-upload-area" id="card-area-1"
                onclick="document.getElementById('card-input-1').click()"
                ondragover="event.preventDefault();this.classList.add('drag-over')"
@@ -396,18 +396,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
                ondrop="handleCardDrop(event,1)">
             <div class="card-upload-icon">📇</div>
             <div class="card-upload-label">
-              <strong>Front / Full card</strong>
+              <strong>Card 1</strong>
               Click · Drag · Paste
             </div>
           </div>
           <div class="card-preview" id="card-preview-1">
-            <img id="card-img-1" src="" alt="Card front">
+            <img id="card-img-1" src="" alt="Card 1">
             <button class="card-preview-remove" onclick="removeCard(1)" title="Remove">×</button>
           </div>
         </div>
         <!-- Back -->
         <div>
-          <div class="card-slot-label">Back of card <span style="font-weight:400;opacity:.6">(optional)</span></div>
+          <div class="card-slot-label">Card 2 <span style="font-weight:400;opacity:.6">(optional)</span></div>
           <div class="card-upload-area" id="card-area-2"
                onclick="document.getElementById('card-input-2').click()"
                ondragover="event.preventDefault();this.classList.add('drag-over')"
@@ -415,12 +415,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
                ondrop="handleCardDrop(event,2)">
             <div class="card-upload-icon">🔄</div>
             <div class="card-upload-label">
-              <strong>Back of card</strong>
+              <strong>Card 2</strong>
               Click · Drag · Paste
             </div>
           </div>
           <div class="card-preview" id="card-preview-2">
-            <img id="card-img-2" src="" alt="Card back">
+            <img id="card-img-2" src="" alt="Card 2">
             <button class="card-preview-remove" onclick="removeCard(2)" title="Remove">×</button>
           </div>
         </div>
@@ -1186,37 +1186,24 @@ async function extractCardData(){
     btn.textContent = '⏳ Reading card...';
 
     // Run OCR on front card (and back if available)
-    // Preprocess image: handle dark backgrounds by trying both normal and inverted
+    // Preprocess: returns both normal and inverted versions, scaled up
     function preprocessCard(dataURL){
       return new Promise(function(resolve){
         var img = new Image();
         img.onload = function(){
-          var canvas = document.createElement('canvas');
-          canvas.width = img.width; canvas.height = img.height;
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-
-          // Check if image is dark (average brightness < 128)
-          var data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-          var brightness = 0;
-          for(var i=0;i<data.length;i+=4){
-            brightness += (data[i]*0.299 + data[i+1]*0.587 + data[i+2]*0.114);
+          function makeCanvas(invert){
+            var c = document.createElement('canvas');
+            c.width = img.width * 2; c.height = img.height * 2;
+            var ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+            if(invert){
+              ctx.globalCompositeOperation = 'difference';
+              ctx.fillStyle = 'white';
+              ctx.fillRect(0, 0, c.width, c.height);
+            }
+            return c.toDataURL();
           }
-          brightness = brightness / (data.length/4);
-
-          if(brightness < 128){
-            // Dark background — invert colors for better OCR
-            ctx.globalCompositeOperation = 'difference';
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-          }
-          // Scale up for better OCR accuracy
-          var out = document.createElement('canvas');
-          out.width = canvas.width * 2; out.height = canvas.height * 2;
-          var octx = out.getContext('2d');
-          octx.imageSmoothingEnabled = false;
-          octx.drawImage(canvas, 0, 0, out.width, out.height);
-          resolve(out.toDataURL());
+          resolve({ normal: makeCanvas(false), inverted: makeCanvas(true) });
         };
         img.src = dataURL;
       });
@@ -1225,17 +1212,22 @@ async function extractCardData(){
     var worker = await Tesseract.createWorker('eng');
     var text1 = '', text2 = '';
 
-    if(cardDataURL){
-      var img1 = await preprocessCard(cardDataURL);
-      var r1 = await worker.recognize(img1);
-      text1 = r1.data.text;
+    // For each card, try both normal and inverted — keep whichever gives more text
+    async function bestOCR(dataURL){
+      var versions = await preprocessCard(dataURL);
+      var rn = await worker.recognize(versions.normal);
+      var ri = await worker.recognize(versions.inverted);
+      var tn = rn.data.text.replace(/\s/g,'').length;
+      var ti = ri.data.text.replace(/\s/g,'').length;
+      return tn >= ti ? rn.data.text : ri.data.text;
     }
-    if(cardDataURL2){
-      var img2 = await preprocessCard(cardDataURL2);
-      var r2 = await worker.recognize(img2);
-      text2 = r2.data.text;
-    }
+
+    if(cardDataURL)  text1 = await bestOCR(cardDataURL);
+    if(cardDataURL2) text2 = await bestOCR(cardDataURL2);
     await worker.terminate();
+
+    console.log('Card 1 OCR:', text1.substring(0,200));
+    console.log('Card 2 OCR:', text2.substring(0,200));
 
     var fullText = (text1 + '\n' + text2).trim();
     console.log('OCR text:', fullText);
@@ -1259,8 +1251,12 @@ async function extractCardData(){
     }
 
     // ── EMAIL ───────────────────────────────────────────────
-    var emailMatch = fullText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+    // OCR sometimes breaks email prefix across lines — join lines before matching
+    var joinedText = fullText.replace(/\n/g,' ');
+    var emailMatch = joinedText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
     var email = emailMatch ? emailMatch[0].toLowerCase() : '';
+    // Fix common OCR email errors: missing letters, .commy -> .com.my
+    email = email.replace(/\.commy$/,'.com.my').replace(/\.comy$/,'.com.my');
 
     // ── COMPANY ─────────────────────────────────────────────
     var company = '';
@@ -1273,18 +1269,23 @@ async function extractCardData(){
 
     // ── NAME ────────────────────────────────────────────────
     var name = '';
-    // Look for name with title prefix
+    // Look for name with title prefix first
     var nameMatch = fullText.match(/(?:Mr\.?|Mrs\.?|Ms\.?|Dr\.?|Prof\.?|Encik|En\.?|Puan|Pn\.?|Cik|Tn\.?)\s+[A-Za-z][A-Za-z\s]{2,30}/i);
     if(nameMatch){
       name = nameMatch[0].replace(/\s+/g,' ').trim();
     } else {
-      // Find a clean proper-case name line (not company, not address, not phone)
+      // Find short proper-case line — likely a personal name (First Last)
+      // Avoid: company names (ALL CAPS, >3 words), addresses, URLs, phone numbers
       for(var i=0;i<lines.length;i++){
-        var l = lines[i].replace(/[|@:]/g,'').trim();
-        if(l.length >= 4 && l.length <= 35
-          && /^[A-Z][a-zA-Z]/.test(l)
-          && !/[0-9]{3}/.test(l)
-          && !l.match(/(?:Sdn|Bhd|Ltd|Jalan|Taman|No\.|Tel|Fax|www|\.com)/i)
+        var l = lines[i].replace(/[|@:>\-]/g,'').replace(/\s+/g,' ').trim();
+        var wordCount = l.split(' ').length;
+        var isAllCaps = l === l.toUpperCase();
+        if(l.length >= 4 && l.length <= 30
+          && wordCount >= 1 && wordCount <= 4
+          && !isAllCaps
+          && /^[A-Z][a-z]/.test(l)
+          && !/[0-9]{2,}/.test(l)
+          && !l.match(/(?:Sdn|Bhd|Ltd|Berhad|Jalan|Taman|Farm|Fresh|Milk|Tel|Fax|www|HQ|Reg)/i)
           && l !== company){
           name = l; break;
         }
