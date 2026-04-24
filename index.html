@@ -1165,7 +1165,7 @@ function removeCard(slot){
 }
 
 // ── GEMINI OCR ───────────────────────────────────────────
-var GEMINI_KEY = 'AIzaSyDPUsuE6Fgml9jUCczXz2mikd5SEMU0YF0';
+var GEMINI_KEY = 'AIzaSyAgTNIysYvhNs682TYlOzoL8HUXTF0yw0s';
 
 async function extractCardData(){
   if(!cardDataURL){ alert('Please upload a business card first.'); return; }
@@ -1199,8 +1199,10 @@ async function extractCardData(){
     // Check for API errors (quota, auth etc)
     if(data.error){
       var code = data.error.code;
-      if(code===429) throw new Error('429 rate limit');
-      throw new Error(data.error.message || 'API error '+code);
+      var msg = data.error.message || 'API error '+code;
+      if(code===429) throw new Error('429 — ' + msg.substring(0,60));
+      if(code===403) throw new Error('403 — API not enabled');
+      throw new Error(code + ': ' + msg.substring(0,60));
     }
     var text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     if(!text) throw new Error('No response from Gemini');
@@ -1226,10 +1228,17 @@ async function extractCardData(){
 
   } catch(e) {
     console.error('OCR error:', e);
-    var msg = e.message && e.message.includes('429') ? '✗ Rate limit — wait 1 min' : '✗ Failed — try again';
+    var msg = '✗ Failed — try again';
+    if(e.message){
+      if(e.message.includes('429')) msg = '✗ Quota exceeded — check API key';
+      else if(e.message.includes('400')) msg = '✗ Invalid request';
+      else if(e.message.includes('403')) msg = '✗ API key not authorised';
+      else msg = '✗ ' + e.message.substring(0,40);
+    }
     btn.textContent = msg;
     btn.style.background = '#ef4444';
-    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 3000);
+    console.error('Full error:', e.message);
+    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 4000);
   }
 }
 
