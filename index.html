@@ -1195,7 +1195,7 @@ async function extractCardData(){
     if(cardDataURL2) addImage(cardDataURL2);
 
     var resp = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCDI6UTrhM_dd4phrDBMFGr5wNPcyoEQPY',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCu8M8KZxI_cVxQATzDg0UHVPAxIYoqCtg',
       { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ contents: [{ parts: parts }] }) }
     );
