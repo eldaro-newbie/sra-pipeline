@@ -208,6 +208,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 @media(max-width:640px){
   .page{padding-bottom:80px}
 }
+
+/* Form section divider */
+.fsec{margin:0 0 18px;padding-bottom:18px;border-bottom:2px solid var(--border)}
+.fsec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--b2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.fsec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Business card upload area */
+.card-upload-area{border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all .2s;background:var(--s2);margin-bottom:10px;position:relative}
+.card-upload-area:hover,.card-upload-area.drag-over{border-color:var(--b2);background:var(--bg)}
+.card-upload-icon{font-size:28px;margin-bottom:6px}
+.card-upload-label{font-size:12px;color:var(--muted);line-height:1.5}
+.card-upload-label strong{color:var(--text);display:block;margin-bottom:2px}
+.card-preview{display:none;position:relative;margin-bottom:10px}
+.card-preview img{width:100%;border-radius:8px;border:1px solid var(--border);max-height:200px;object-fit:contain;background:#f5f5f5}
+.card-preview-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1}
+.card-hidden-input{display:none}
+.card-ocr-btn{width:100%;padding:8px;background:var(--b2);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:none;margin-top:6px}
+.card-ocr-btn:hover{opacity:.9}
+
+/* Export contact button */
+.export-contact-btn{font-size:11px;padding:3px 10px;background:transparent;border:1px solid var(--border);border-radius:5px;cursor:pointer;color:var(--muted);font-family:var(--font);white-space:nowrap}
+.export-contact-btn:hover{background:var(--s2);color:var(--text)}
+.copied-flash{color:var(--won);font-size:11px;font-family:var(--mono);display:none}
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
@@ -351,10 +374,49 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 <div class="page" id="page-new">
   <div class="ph"><div><div class="pt">Log new enquiry</div><div class="ps">Saved directly to Google Sheets</div></div></div>
   <div class="panel">
+
+    <!-- ── PART 1: CONTACT INFO ── -->
+    <div class="fsec">
+      <div class="fsec-title">Contact information</div>
+
+      <!-- Business card upload -->
+      <input type="file" id="card-input" class="card-hidden-input" accept="image/*" capture="environment">
+      <div class="card-upload-area" id="card-upload-area"
+           onclick="document.getElementById('card-input').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleCardDrop(event)">
+        <div class="card-upload-icon">📇</div>
+        <div class="card-upload-label">
+          <strong>Paste or drag a business card photo</strong>
+          Click to upload · Take photo on mobile
+        </div>
+      </div>
+      <div class="card-preview" id="card-preview">
+        <img id="card-preview-img" src="" alt="Business card">
+        <button class="card-preview-remove" onclick="removeCard()" title="Remove">×</button>
+      </div>
+      <button class="card-ocr-btn" id="card-ocr-btn" onclick="extractCardData()">
+        ✦ Extract data from card
+      </button>
+
+      <div class="fg" style="margin-top:14px">
+        <div class="fgp"><label class="flb">Client / company name *</label><input class="fi" id="fn" placeholder="e.g. Acme Sdn Bhd"></div>
+        <div class="fgp"><label class="flb">Contact name *</label><input class="fi" id="fcn" placeholder="e.g. Mr Tan Wei Ming"></div>
+        <div class="fgp"><label class="flb">Phone number *</label><input class="fi" id="fph" type="tel" placeholder="e.g. 012-345-6789"></div>
+        <div class="fgp"><label class="flb">Job title</label><input class="fi" id="fjt" placeholder="e.g. Facility Manager"></div>
+        <div class="fgp"><label class="flb">Email</label><input class="fi" id="fe" type="email" placeholder="optional"></div>
+        <div class="fgp"><label class="flb">Site location</label><input class="fi" id="flo" placeholder="e.g. Pasir Gudang, Johor"></div>
+      </div>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+        <button class="export-contact-btn" onclick="exportContact()">📋 Copy contact</button>
+        <span class="copied-flash" id="copied-flash">✓ Copied!</span>
+      </div>
+    </div>
+
+    <!-- ── PART 2: ENQUIRY DETAILS ── -->
+    <div class="fsec-title">Enquiry details</div>
     <div class="fg">
-      <div class="fgp"><label class="flb">Client / company name *</label><input class="fi" id="fn" placeholder="e.g. Acme Sdn Bhd"></div>
-      <div class="fgp"><label class="flb">Contact person & number *</label><input class="fi" id="fc" placeholder="e.g. Mr Tan · 012-345-6789"></div>
-      <div class="fgp"><label class="flb">Email</label><input class="fi" id="fe" type="email" placeholder="optional"></div>
       <div class="fgp"><label class="flb">Source channel</label>
         <select class="fse" id="fso"><option>WhatsApp</option><option>Email</option><option>Website form</option><option>Phone call</option><option>BNI referral</option><option>Friend referral</option><option>Salesman — Daniel</option><option>Salesman — Mr Lee</option><option>Walk-in</option></select>
       </div>
@@ -376,12 +438,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
       <div class="fgp"><label class="flb">New or replacement</label>
         <select class="fse" id="fin"><option>New installation</option><option>Replacement</option><option>Upgrade</option><option>Unknown</option></select>
       </div>
-      <div class="fgp"><label class="flb">Site location</label><input class="fi" id="flo" placeholder="e.g. Pasir Gudang, Johor"></div>
       <div class="fgp"><label class="flb">Next action date</label><input class="fi" id="fda" type="date"></div>
       <div class="fgp full"><label class="flb">Problem statement / notes</label>
         <textarea class="fta" id="fno" placeholder="What are they cooling? Floor area? Compliance req (GMP/ISO/cleanroom)? Timeline? Budget?"></textarea>
       </div>
     </div>
+
     <div class="fa">
       <button class="btn bp" id="save-btn" onclick="saveLead()">Save to Google Sheets</button>
       <button class="btn" onclick="clearForm()">Clear</button>
@@ -643,7 +705,9 @@ function openModal(id){
     '</div></div>'+
     '<div class="ms2"><div class="mst">Client details</div><div class="fg2">'+
       '<div class="eg"><label class="el">Client name</label><input class="ei" id="m_name" value="'+lv(l,'Client name')+'"></div>'+
-      '<div class="eg"><label class="el">Contact</label><input class="ei" id="m_contact" value="'+lv(l,'Contact person & number')+'"></div>'+
+      '<div class="eg"><label class="el">Contact name</label><input class="ei" id="m_cname" value="'+(lv(l,'Contact name')||lv(l,'Contact person & number').split('·')[0].trim())+'"></div>'+
+      '<div class="eg"><label class="el">Phone number</label><input class="ei" id="m_phone" value="'+(lv(l,'Phone number')||lv(l,'Contact person & number').split('·')[1]?.trim()||'')+'"></div>'+
+      '<div class="eg"><label class="el">Job title</label><input class="ei" id="m_jobtitle" value="'+(lv(l,'Job title')||'')+'"></div>'+
       '<div class="eg"><label class="el">Email</label><input class="ei" id="m_email" type="email" value="'+(lv(l,'Email')||'')+'"></div>'+
       '<div class="eg"><label class="el">Site location</label><input class="ei" id="m_location" value="'+(lv(l,'Site location')||'')+'"></div>'+
     '</div></div>'+
@@ -660,6 +724,8 @@ function openModal(id){
     '<div class="mf">'+
       '<button class="btn bp bsm" onclick="saveEdit()">Save to Sheets</button>'+
       '<button class="btn bsm" onclick="closeModal()">Cancel</button>'+
+      '<button class="export-contact-btn" onclick="exportContact()">📋 Copy contact</button>'+
+      '<span class="copied-flash" id="copied-flash-modal"></span>'+
       '<span class="stoa" id="stoa"></span>'+
     '</div>';
   // Scroll the edit panel into view
@@ -686,7 +752,11 @@ async function saveModal(){
   l['Next action date']=document.getElementById('m_actiondate')?document.getElementById('m_actiondate').value:'';
   l['Quotation no.']=document.getElementById('m_quot')?document.getElementById('m_quot').value:'';
   l['Client name']=document.getElementById('m_name')?document.getElementById('m_name').value:lv(l,'Client name');
-  l['Contact person & number']=document.getElementById('m_contact')?document.getElementById('m_contact').value:'';
+  l['Contact name']=document.getElementById('m_cname')?document.getElementById('m_cname').value:'';
+  l['Phone number']=document.getElementById('m_phone')?document.getElementById('m_phone').value:'';
+  l['Job title']=document.getElementById('m_jobtitle')?document.getElementById('m_jobtitle').value:'';
+  var cname=l['Contact name'],cphone=l['Phone number'];
+  l['Contact person & number']=cname&&cphone?cname+' · '+cphone:cname||cphone||'';
   l['Email']=document.getElementById('m_email')?document.getElementById('m_email').value:'';
   l['Site location']=document.getElementById('m_location')?document.getElementById('m_location').value:'';
   l['Source channel']=gv('Source channel');
@@ -733,7 +803,15 @@ async function saveLead(){
   var lead={
     'ID':String(Date.now()),
     'Client name':name,
-    'Contact person & number':document.getElementById('fc').value,
+    'Contact name':document.getElementById('fcn').value,
+    'Phone number':document.getElementById('fph').value,
+    'Job title':document.getElementById('fjt').value,
+    'Business card':'', // filled after Drive upload
+    'Contact person & number':(document.getElementById('fcn').value+' · '+document.getElementById('fph').value).trim().replace(/^·\s*|\s*·$/g,''),
+    'Contact name':document.getElementById('fcn').value,
+    'Phone number':document.getElementById('fph').value,
+    'Job title':document.getElementById('fjt').value,
+    'Business card':'', // filled after Drive upload
     'Email':document.getElementById('fe').value,
     'Source channel':document.getElementById('fso').value,
     'Date logged':today,
@@ -755,6 +833,17 @@ async function saveLead(){
   btn.disabled=true;btn.textContent='Saving...';
   setSS('sync','Saving new lead...');
   try{
+    // Upload business card to Drive if photo was taken
+    if(cardDataURL){
+      try{
+        var driveLink = await uploadCardToDrive(
+          cardDataURL,
+          lead['Client name'],
+          lead['Contact name']
+        );
+        if(driveLink) lead['Business card'] = driveLink;
+      } catch(e){ console.warn('Drive upload failed:', e); }
+    }
     var r=await apiPost('addLead',lead);
     if(r.ok){
       if(r.data)leads.unshift(r.data);
@@ -773,7 +862,10 @@ async function saveLead(){
 }
 
 function clearForm(){
-  ['fn','fc','fe','flo','fno','fda'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['fn','fcn','fph','fjt','fe','flo','fda','fno'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  removeCard();
+  ['fso','fi2','fsl','fdv','fas','fpr','fin'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  var btn=document.getElementById('save-btn');if(btn){btn.disabled=false;btn.textContent='Save to Google Sheets';}
 }
 
 // ── INIT ──────────────────────────────────────────────
@@ -973,6 +1065,183 @@ function addTableLabels(){
     }
   });
 })();
+
+
+// ── BUSINESS CARD UPLOAD ────────────────────────────────
+var cardDataURL = null;
+
+document.addEventListener('DOMContentLoaded', function(){
+  var inp = document.getElementById('card-input');
+  if(inp) inp.addEventListener('change', function(){
+    if(this.files && this.files[0]) loadCardFile(this.files[0]);
+  });
+  // Paste support (Ctrl+V anywhere on the form page)
+  document.addEventListener('paste', function(e){
+    if(document.querySelector('#page-new.active')){
+      var items = e.clipboardData?.items || [];
+      for(var i=0;i<items.length;i++){
+        if(items[i].type.startsWith('image/')){
+          loadCardFile(items[i].getAsFile());
+          break;
+        }
+      }
+    }
+  });
+});
+
+function handleCardDrop(e){
+  e.preventDefault();
+  document.getElementById('card-upload-area').classList.remove('drag-over');
+  var file = e.dataTransfer.files[0];
+  if(file && file.type.startsWith('image/')) loadCardFile(file);
+}
+
+function loadCardFile(file){
+  var reader = new FileReader();
+  reader.onload = function(e){
+    cardDataURL = e.target.result;
+    document.getElementById('card-preview-img').src = cardDataURL;
+    document.getElementById('card-preview').style.display = 'block';
+    document.getElementById('card-upload-area').style.display = 'none';
+    document.getElementById('card-ocr-btn').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeCard(){
+  cardDataURL = null;
+  document.getElementById('card-preview').style.display = 'none';
+  document.getElementById('card-upload-area').style.display = 'block';
+  document.getElementById('card-ocr-btn').style.display = 'none';
+  document.getElementById('card-preview-img').src = '';
+  var inp = document.getElementById('card-input');
+  if(inp) inp.value = '';
+}
+
+// ── GEMINI OCR ───────────────────────────────────────────
+var GEMINI_KEY = 'AIzaSyBEnQ1LWkmX87l9k2kh2IWHlVFYzbGClsU';
+
+async function extractCardData(){
+  if(!cardDataURL){ alert('Please upload a business card first.'); return; }
+  var btn = document.getElementById('card-ocr-btn');
+  btn.textContent = '✦ Reading card...';
+  btn.disabled = true;
+
+  try {
+    // Strip data URL prefix to get base64
+    var base64 = cardDataURL.split(',')[1];
+    var mimeType = cardDataURL.split(';')[0].split(':')[1];
+
+    var body = {
+      contents: [{
+        parts: [
+          { text: 'Extract contact information from this business card. Return ONLY a JSON object with these exact keys: company, name, phone, title, email, address. If a field is not found, use empty string. No markdown, no explanation, just the JSON.' },
+          { inline_data: { mime_type: mimeType, data: base64 } }
+        ]
+      }]
+    };
+
+    var resp = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_KEY,
+      { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }
+    );
+    var data = await resp.json();
+    var text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Parse JSON from response
+    var clean = text.replace(/```json|```/g,'').trim();
+    var info = JSON.parse(clean);
+
+    // Auto-fill form fields
+    if(info.company) document.getElementById('fn').value = info.company;
+    if(info.name)    document.getElementById('fcn').value = info.name;
+    if(info.phone)   document.getElementById('fph').value = info.phone;
+    if(info.title)   document.getElementById('fjt').value = info.title;
+    if(info.email)   document.getElementById('fe').value  = info.email;
+    if(info.address) document.getElementById('flo').value = info.address;
+
+    btn.textContent = '✓ Data extracted!';
+    btn.style.background = 'var(--won)';
+    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 2500);
+
+  } catch(e) {
+    console.error('OCR error:', e);
+    btn.textContent = '✗ Failed — try again';
+    btn.style.background = '#ef4444';
+    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 2500);
+  }
+}
+
+// ── EXPORT CONTACT (one-click copy) ─────────────────────
+function exportContact(){
+  var company = (document.getElementById('fn')?.value || document.getElementById('fcn')?.value || '').trim();
+  // Try from modal if open
+  if(!company && document.getElementById('modal')?.classList.contains('open')){
+    var lead = curId ? leads.find(function(l){return lv(l,'ID')===curId;}) : null;
+    if(lead){
+      var text = [
+        lv(lead,'Client name'),
+        lv(lead,'Site location'),
+        lv(lead,'Contact name') || lv(lead,'Contact person & number').split('·')[0].trim(),
+        lv(lead,'Phone number') || lv(lead,'Contact person & number').split('·')[1]?.trim() || '',
+        lv(lead,'Job title')
+      ].filter(Boolean).join(', ');
+      copyToClipboard(text, 'copied-flash-modal');
+      return;
+    }
+  }
+  // From new lead form
+  var text = [
+    (document.getElementById('fn')?.value||'').trim(),
+    (document.getElementById('flo')?.value||'').trim(),
+    (document.getElementById('fcn')?.value||'').trim(),
+    (document.getElementById('fph')?.value||'').trim(),
+    (document.getElementById('fjt')?.value||'').trim()
+  ].filter(Boolean).join(', ');
+  if(!text){alert('Fill in contact details first.');return;}
+  copyToClipboard(text, 'copied-flash');
+}
+
+function copyToClipboard(text, flashId){
+  navigator.clipboard.writeText(text).then(function(){
+    var el = document.getElementById(flashId);
+    if(el){el.style.display='inline';setTimeout(function(){el.style.display='none';},2000);}
+  }).catch(function(){
+    // Fallback
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    var el = document.getElementById(flashId);
+    if(el){el.style.display='inline';setTimeout(function(){el.style.display='none';},2000);}
+  });
+}
+
+
+// ── GOOGLE DRIVE UPLOAD (via Apps Script) ────────────────
+async function uploadCardToDrive(dataURL, company, contactName){
+  var year = new Date().getFullYear();
+  // Format: 2026 - Systems R&A - Elson Siew
+  var coy = (company||'Unknown').replace(/[^a-zA-Z0-9\s&]/g,' ').trim();
+  var person = (contactName||'Unknown').replace(/[^a-zA-Z0-9\s]/g,' ').trim();
+  var filename = year + ' - ' + coy + ' - ' + person;
+
+  var base64 = dataURL.split(',')[1];
+  var mimeType = dataURL.split(';')[0].split(':')[1];
+
+  var payload = {
+    action: 'uploadCard',
+    filename: filename,
+    mimeType: mimeType,
+    base64: base64,
+    folderId: '1cDv64dPA8Yoo_yNrvuWcF0SXISprdACF'
+  };
+
+  var encoded = encodeURIComponent(JSON.stringify(payload));
+  var resp = await fetch(API + '?action=uploadCard&data=' + encoded);
+  var result = await resp.json();
+  if(result.ok) return result.url;
+  throw new Error(result.error || 'Drive upload failed');
+}
 
 </script>
 
