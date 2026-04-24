@@ -234,7 +234,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .export-contact-btn{font-size:11px;padding:3px 10px;background:transparent;border:1px solid var(--border);border-radius:5px;cursor:pointer;color:var(--muted);font-family:var(--font);white-space:nowrap}
 .export-contact-btn:hover{background:var(--s2);color:var(--text)}
 .copied-flash{color:var(--won);font-size:11px;font-family:var(--mono);display:none}
-</style>
+
+  .cup-overlay{position:absolute;inset:0;background:rgba(255,255,255,.9);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:20}
+  .cup-spin{width:28px;height:28px;border:3px solid #e5e5e5;border-top-color:#111;border-radius:50%;animation:spin .7s linear infinite}
+  .cup-bar-w{width:75%;height:5px;background:#e5e5e5;border-radius:3px;overflow:hidden}
+  .cup-bar-f{height:100%;background:#111;border-radius:3px;transition:width .4s}
+  .cup-lbl{font-size:11px;color:#555;font-weight:500}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
 </head>
@@ -257,6 +264,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
     <button class="ni" onclick="showPage('master')"><span style="width:16px;text-align:center">≡</span>Master list</button>
     <button class="ni" onclick="showPage('kanban')"><span style="width:16px;text-align:center">⊞</span>Kanban board</button>
     <button class="ni" onclick="showPage('quotes')"><span style="width:16px;text-align:center">📄</span>Quotations</button>
+  <button class="ni" onclick="showPage('recycle')" title="Recycle Bin"><span style="width:16px;text-align:center">🗑</span>Recycle Bin</button>
   </div>
   <div class="ndiv"></div>
   <div class="ns">
@@ -383,8 +391,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
       <div class="fsec-title">Contact information</div>
 
       <!-- Business card upload — Front & Back -->
-      <input type="file" id="card-input-1" class="card-hidden-input" accept="image/*">
-      <input type="file" id="card-input-2" class="card-hidden-input" accept="image/*">
+      <input type="file" id="card-input-1" class="card-hidden-input" accept="image/*" capture="environment">
+      <input type="file" id="card-input-2" class="card-hidden-input" accept="image/*" capture="environment">
       <div class="card-slots">
         <!-- Front -->
         <div>
@@ -474,7 +482,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
     </div>
 
     <div class="fa">
-      <button class="btn bp" id="save-btn" onclick="saveLead()">Save to Google Sheets</button>
+      <button class="btn bp" id="save-btn" onclick="showSaving();saveLead().finally(hideSaving)">Save to Google Sheets</button>
       <button class="btn" onclick="clearForm()">Clear</button>
       <span class="toast" id="form-toast">✓ Saved to Google Sheets</span>
     </div>
@@ -590,7 +598,7 @@ function renderDash(){
   var won=leads.filter(function(l){return lv(l,'Status')==='Won';}),od=leads.filter(isOD);
   var arc=leads.filter(function(l){return parseInt(lv(l,'Follow-up count')||0)>=2&&isActive(l);});
   var d2=leads.filter(function(l){return lv(l,'Division')==='Div 2'&&isActive(l);});
-  var tot=leads.filter(function(l){return lv(l,'Status')!=='Archived';});
+  var tot=leads.filter(function(l){return lv(l,'Status')!=='Archived'&&lv(l,'Deleted')!=='1';});
   var qn=leads.filter(function(l){return lv(l,'Quotation no.');}).length;
 
   document.getElementById('dash-metrics').innerHTML=[
@@ -653,6 +661,74 @@ function renderDash(){
 
 // ── MASTER LIST ───────────────────────────────────────
 function setMF(f,btn){mf=f;document.querySelectorAll('#mf .fbt').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderMaster();}
+
+// ── RECYCLE BIN FUNCTIONS ─────────────────────────────────────
+async function softDeleteLead(id, name){
+  if(!confirm('Move "'+name+'" to Recycle Bin?')) return;
+  const lead=leads.find(l=>lv(l,'ID')===String(id));
+  if(!lead) return;
+  lead['Deleted']='1';
+  try{
+    await fetch(API+'?action=updateLead&data='+encodeURIComponent(JSON.stringify(lead)));
+    leads=leads.map(l=>lv(l,'ID')===String(id)?lead:l);
+    renderMaster();
+    showToast('"'+name+'" moved to Recycle Bin');
+  }catch(e){alert('Error: '+e.message);}
+}
+async function restoreLead(id, name){
+  const lead=leads.find(l=>lv(l,'ID')===String(id));
+  if(!lead) return;
+  lead['Deleted']='';
+  try{
+    await fetch(API+'?action=updateLead&data='+encodeURIComponent(JSON.stringify(lead)));
+    leads=leads.map(l=>lv(l,'ID')===String(id)?lead:l);
+    renderRecycleBin();
+    showToast('"'+name+'" restored');
+  }catch(e){alert('Error: '+e.message);}
+}
+async function permanentDeleteLead(id, name){
+  if(!confirm('Permanently delete "'+name+'"?\nThis cannot be undone.')) return;
+  try{
+    const resp=await fetch(API+'?action=deleteLead&data='+encodeURIComponent(JSON.stringify({ID:id})));
+    const result=await resp.json();
+    if(!result.ok) throw new Error(result.error||'Delete failed');
+    leads=leads.filter(l=>lv(l,'ID')!==String(id));
+    renderRecycleBin();
+    showToast('"'+name+'" permanently deleted');
+  }catch(e){alert('Error: '+e.message);}
+}
+function renderRecycleBin(){
+  const deleted=leads.filter(l=>lv(l,'Deleted')==='1');
+  const cont=document.getElementById('recycle');
+  if(!cont) return;
+  if(!deleted.length){
+    cont.innerHTML='<div style="padding:60px 20px;text-align:center;color:#aaa"><div style="font-size:48px;margin-bottom:12px">🗑</div><div style="font-size:15px">Recycle Bin is empty</div></div>';
+    return;
+  }
+  let html='<div style="padding:24px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">';
+  html+='<h2 style="font-size:18px;font-weight:700;margin:0">Recycle Bin</h2>';
+  html+='<span style="background:#f5f5f5;padding:2px 8px;border-radius:12px;font-size:12px;color:#666">'+deleted.length+' item'+(deleted.length>1?'s':'')+'</span></div>';
+  html+='<table style="width:100%;border-collapse:collapse;font-size:14px">';
+  html+='<thead><tr style="border-bottom:2px solid #eee"><th style="text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;color:#999;font-weight:600">Company</th>';
+  html+='<th style="text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;color:#999;font-weight:600">Contact</th>';
+  html+='<th style="text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;color:#999;font-weight:600">Status</th>';
+  html+='<th style="padding:8px 12px"></th></tr></thead><tbody>';
+  deleted.forEach(l=>{
+    const id=lv(l,'ID');
+    const nm=lv(l,'Client name').replace(/'/g,"&apos;");
+    const nms=lv(l,'Client name').replace(/'/g,"\'");
+    html+='<tr style="border-bottom:1px solid #f5f5f5">';
+    html+='<td style="padding:10px 12px;font-weight:600">'+lv(l,'Client name')+'</td>';
+    html+='<td style="padding:10px 12px;color:#666">'+lv(l,'Contact name')+'</td>';
+    html+='<td style="padding:10px 12px"><span style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px">'+lv(l,'Status')+'</span></td>';
+    html+='<td style="padding:10px 12px;text-align:right;white-space:nowrap">';
+    html+='<button onclick="restoreLead(''+id+'',''+nms+'')" style="padding:5px 12px;font-size:12px;border:1px solid #d1d5db;border-radius:5px;cursor:pointer;background:#fff;margin-right:6px;font-weight:500">↩ Restore</button>';
+    html+='<button onclick="permanentDeleteLead(''+id+'',''+nms+'')" style="padding:5px 12px;font-size:12px;border:1px solid #fca5a5;border-radius:5px;cursor:pointer;background:#fff5f5;color:#dc2626;font-weight:500">🗑 Delete Forever</button>';
+    html+='</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  cont.innerHTML=html;
+}
 function renderMaster(){
   var q=(document.getElementById('msearch')?.value||'').toLowerCase();
   var f=leads.filter(function(l){return lv(l,'Status')!=='Archived';});
@@ -826,6 +902,26 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 function closeMO(e){if(e.target===document.getElementById('modal'))closeModal();}
 
 // ── NEW LEAD ──────────────────────────────────────────
+
+function showSaving(){
+  const btn=document.querySelector('button[onclick*="saveLead"]');
+  if(btn){btn.disabled=true;btn._ot=btn.innerHTML;btn.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px"><span class="cup-spin" style="width:14px;height:14px;border-width:2px;display:inline-block"></span>Saving...</span>';}
+}
+function hideSaving(){
+  const btn=document.querySelector('button[onclick*="saveLead"]');
+  if(btn){btn.disabled=false;btn.innerHTML=btn._ot||'💾 Save to Google Sheets';}
+  document.querySelectorAll('.cup-overlay').forEach(e=>e.remove());
+}
+function showCardUpload(slotEl, current, total){
+  slotEl.style.position='relative';
+  const old=slotEl.querySelector('.cup-overlay'); if(old) old.remove();
+  const pct=Math.round((current/total)*100);
+  const d=document.createElement('div'); d.className='cup-overlay';
+  d.innerHTML='<div class="cup-spin"></div>'+
+    '<div class="cup-bar-w"><div class="cup-bar-f" style="width:'+pct+'%"></div></div>'+
+    '<div class="cup-lbl">Uploading '+current+' of '+total+'…</div>';
+  slotEl.appendChild(d);
+}
 async function saveLead(){
   var name=document.getElementById('fn').value.trim();
   if(!name){alert('Please enter a client name.');return;}
@@ -867,11 +963,11 @@ async function saveLead(){
       try{
         var links = [];
         if(cardDataURL){
-          var l1 = await uploadCardToDrive(cardDataURL, lead['Client name'], lead['Contact name'], 1);
+          const _s1=document.querySelectorAll('.card-slot')[0];if(_s1)showCardUpload(_s1,1,2);var l1 = await uploadCardToDrive(cardDataURL, lead['Client name'], lead['Contact name'], 1);
           if(l1) links.push(l1);
         }
         if(cardDataURL2){
-          var l2 = await uploadCardToDrive(cardDataURL2, lead['Client name'], lead['Contact name'], 2);
+          const _s2=document.querySelectorAll('.card-slot')[1];if(_s2)showCardUpload(_s2,2,2);var l2 = await uploadCardToDrive(cardDataURL2, lead['Client name'], lead['Contact name'], 2);
           if(l2) links.push(l2);
         }
         if(links.length) lead['Business card'] = links.join(' | ');
@@ -1253,7 +1349,7 @@ function exportContact(){
         lv(lead,'Job title'),
         lv(lead,'Email')
       ].filter(Boolean);
-      copyToClipboard(parts.join(', '), 'copied-flash-modal');
+      copyToClipboard(parts.join('\n'), 'copied-flash-modal');
       return;
     }
   }
