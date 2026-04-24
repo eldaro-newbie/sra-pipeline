@@ -1165,125 +1165,101 @@ function removeCard(slot){
 }
 
 // ── GEMINI OCR ───────────────────────────────────────────
-var GEMINI_KEY = 'AIzaSyAv_D2RS_uKgN5gDQpQwKK59UIHgKreokg';
 
 async function extractCardData(){
-  if(!cardDataURL){ alert('Please upload a business card first.'); return; }
+  if(!cardDataURL && !cardDataURL2){ alert('Please upload a business card first.'); return; }
   var btn = document.getElementById('card-ocr-btn');
-  btn.textContent = '✦ Reading card...';
+  btn.textContent = '⏳ Loading OCR engine...';
   btn.disabled = true;
 
   try {
-    // Strip data URL prefix to get base64
-    var base64 = cardDataURL.split(',')[1];
-    var mimeType = cardDataURL.split(';')[0].split(':')[1];
+    // Load Tesseract.js if not already loaded
+    if(typeof Tesseract === 'undefined'){
+      await new Promise(function(resolve, reject){
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+        s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
 
-    // Build parts — include both front and back if available
-    var parts = [
-      { text: 'Extract contact information from this business card (may have front and back images). Return ONLY a valid JSON object with these exact keys: company, name, phone, title, email, address. Combine info from both sides. If a field is not found use empty string. No markdown, no code blocks, just raw JSON.' },
-      { inline_data: { mime_type: mimeType, data: base64 } }
-    ];
-    // Add back of card if provided
+    btn.textContent = '⏳ Reading card...';
+
+    // Run OCR on front card (and back if available)
+    var worker = await Tesseract.createWorker('eng');
+    var text1 = '', text2 = '';
+
+    if(cardDataURL){
+      var r1 = await worker.recognize(cardDataURL);
+      text1 = r1.data.text;
+    }
     if(cardDataURL2){
-      var base64b = cardDataURL2.split(',')[1];
-      var mimeB   = cardDataURL2.split(';')[0].split(':')[1];
-      parts.push({ inline_data: { mime_type: mimeB, data: base64b } });
+      var r2 = await worker.recognize(cardDataURL2);
+      text2 = r2.data.text;
     }
-    var body = { contents: [{ parts: parts }] };
+    await worker.terminate();
 
-    var resp = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY,
-      { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }
-    );
-    var data = await resp.json();
-    // Check for API errors (quota, auth etc)
-    if(data.error){
-      var code = data.error.code;
-      var msg = data.error.message || 'API error '+code;
-      if(code===429) throw new Error('429 — ' + msg.substring(0,60));
-      if(code===403) throw new Error('403 — API not enabled');
-      throw new Error(code + ': ' + msg.substring(0,60));
+    var fullText = (text1 + '\n' + text2).trim();
+    console.log('OCR text:', fullText);
+
+    // Parse extracted text into fields
+    var lines = fullText.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+
+    // Phone: look for Malaysian phone patterns
+    var phoneMatch = fullText.match(/(?:\+?6?0|0)[1-9][0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{3,4}/);
+    var phone = phoneMatch ? phoneMatch[0].replace(/\s/g,'') : '';
+
+    // Email
+    var emailMatch = fullText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+    var email = emailMatch ? emailMatch[0] : '';
+
+    // Company: usually shortest ALL CAPS line or line with Sdn Bhd / Pte Ltd
+    var company = '';
+    var companyMatch = fullText.match(/[A-Za-z0-9\s&.,()]+(?:Sdn\.?\s*Bhd|Pte\.?\s*Ltd|Sdn Bhd|SDN BHD|PLT|LLP)/i);
+    if(companyMatch) company = companyMatch[0].trim();
+
+    // Name: line with Mr/Ms/Dr or longest proper-case line that isn't company/phone/email
+    var name = '';
+    var nameMatch = fullText.match(/(?:Mr\.?|Mrs\.?|Ms\.?|Dr\.?|Encik|Puan|Cik)\s+[A-Za-z\s]+/i);
+    if(nameMatch){ name = nameMatch[0].trim(); }
+    else {
+      // Try finding a proper case line (First Last format)
+      for(var i=0;i<lines.length;i++){
+        var l = lines[i];
+        if(l.length > 3 && l.length < 40 && /^[A-Z][a-z]/.test(l) && !l.includes('@') && !/[0-9]{4}/.test(l)){
+          if(l !== company){ name = l; break; }
+        }
+      }
     }
-    var text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if(!text) throw new Error('No response from Gemini');
 
-    // Parse JSON from response — handle markdown code blocks
-    var clean = text.replace(/```json|```/g,'').trim();
-    // Find JSON object in response
-    var jsonMatch = clean.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error('Could not parse response');
-    var info = JSON.parse(jsonMatch[0]);
+    // Title: look for common job title keywords
+    var title = '';
+    var titleMatch = fullText.match(/(?:Manager|Director|Engineer|Executive|CEO|CFO|COO|Sales|Marketing|Technical|Account|Project|General|Senior|Assistant|Head|Officer|Consultant|Supervisor|Coordinator)[A-Za-z\s,]*/i);
+    if(titleMatch) title = titleMatch[0].trim().split('\n')[0];
 
-    // Auto-fill form fields
-    if(info.company) document.getElementById('fn').value = info.company;
-    if(info.name)    document.getElementById('fcn').value = info.name;
-    if(info.phone)   document.getElementById('fph').value = info.phone;
-    if(info.title)   document.getElementById('fjt').value = info.title;
-    if(info.email)   document.getElementById('fe').value  = info.email;
-    if(info.address) document.getElementById('flo').value = info.address;
+    // Address: look for lines with common address keywords
+    var address = '';
+    var addrMatch = fullText.match(/(?:Jalan|Jln|Lorong|Lot|No\.?|Block|Taman|Bandar|Johor|Selangor|KL|Kuala Lumpur|Penang|Melaka|Perak|Kedah|Pahang|Sabah|Sarawak)[^\n]{5,60}/i);
+    if(addrMatch) address = addrMatch[0].trim();
 
-    btn.textContent = '✓ Data extracted!';
+    // Fill in the form
+    if(company) document.getElementById('fn').value = company;
+    if(name)    document.getElementById('fcn').value = name;
+    if(phone)   document.getElementById('fph').value = phone;
+    if(title)   document.getElementById('fjt').value = title;
+    if(email)   document.getElementById('fe').value  = email;
+    if(address) document.getElementById('flo').value = address;
+
+    btn.textContent = '✓ Done — please review fields';
     btn.style.background = 'var(--won)';
-    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 2500);
+    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 3000);
 
   } catch(e) {
     console.error('OCR error:', e);
-    var msg = '✗ Failed — try again';
-    if(e.message){
-      if(e.message.includes('429')) msg = '✗ Quota exceeded — check API key';
-      else if(e.message.includes('400')) msg = '✗ Invalid request';
-      else if(e.message.includes('403')) msg = '✗ API key not authorised';
-      else msg = '✗ ' + e.message.substring(0,40);
-    }
-    btn.textContent = msg;
+    btn.textContent = '✗ Failed — try again';
     btn.style.background = '#ef4444';
-    console.error('Full error:', e.message);
-    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 4000);
+    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 3000);
   }
-}
-
-// ── EXPORT CONTACT (one-click copy) ─────────────────────
-function exportContact(){
-  var company = (document.getElementById('fn')?.value || document.getElementById('fcn')?.value || '').trim();
-  // Try from modal if open
-  if(!company && document.getElementById('modal')?.classList.contains('open')){
-    var lead = curId ? leads.find(function(l){return lv(l,'ID')===curId;}) : null;
-    if(lead){
-      var text = [
-        lv(lead,'Client name'),
-        lv(lead,'Site location'),
-        lv(lead,'Contact name') || lv(lead,'Contact person & number').split('·')[0].trim(),
-        lv(lead,'Phone number') || lv(lead,'Contact person & number').split('·')[1]?.trim() || '',
-        lv(lead,'Job title')
-      ].filter(Boolean).join(', ');
-      copyToClipboard(text, 'copied-flash-modal');
-      return;
-    }
-  }
-  // From new lead form
-  var text = [
-    (document.getElementById('fn')?.value||'').trim(),
-    (document.getElementById('flo')?.value||'').trim(),
-    (document.getElementById('fcn')?.value||'').trim(),
-    (document.getElementById('fph')?.value||'').trim(),
-    (document.getElementById('fjt')?.value||'').trim()
-  ].filter(Boolean).join(', ');
-  if(!text){alert('Fill in contact details first.');return;}
-  copyToClipboard(text, 'copied-flash');
-}
-
-function copyToClipboard(text, flashId){
-  navigator.clipboard.writeText(text).then(function(){
-    var el = document.getElementById(flashId);
-    if(el){el.style.display='inline';setTimeout(function(){el.style.display='none';},2000);}
-  }).catch(function(){
-    // Fallback
-    var ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    var el = document.getElementById(flashId);
-    if(el){el.style.display='inline';setTimeout(function(){el.style.display='none';},2000);}
-  });
 }
 
 
