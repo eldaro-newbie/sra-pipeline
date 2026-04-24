@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Systems R&A Ã¢ÂÂ Lead Pipeline</title>
+<title>Systems R&A — Lead Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f7f6f3;--white:#fff;--s2:#f2f1ee;--border:#e8e6e1;--b2:#d4d2cc;--text:#1a1916;--muted:#7a786f;--m2:#b0aea6;--accent:#1a1916;--a2:#3d3b35;--hot:#c94040;--hbg:#fdf0f0;--hb:#f0c4c4;--warm:#b87020;--wbg:#fdf6ec;--wb:#f0d8a8;--cold:#2060a8;--cbg:#f0f4fd;--cb:#bcd0f0;--won:#1f7a45;--gbg:#f0faf4;--gb:#a8dfc0;--d2c:#6040b0;--d2bg:#f5f0fd;--d2b:#d0b8f4;--d1c:#2060a8;--ec:#6040b0;--ebg:#f5f0fd;--eb:#d0b8f4;--dc:#2060a8;--dbg:#f0f4fd;--db:#bcd0f0;--lc:#1f7a45;--lbg:#f0faf4;--lb:#a8dfc0;--sh:0 1px 3px rgba(0,0,0,.06);--shm:0 4px 12px rgba(0,0,0,.08);--r:8px;--rl:12px;--font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace}
@@ -124,12 +124,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .cf-sel{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;font-family:var(--font);color:var(--text);outline:none;width:100%}
 .cf-reset{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:12px;font-family:var(--font);color:var(--muted);cursor:pointer}
 
-/* Ã¢ÂÂÃ¢ÂÂ MOBILE HAMBURGER BUTTON Ã¢ÂÂÃ¢ÂÂ */
+/* ── MOBILE HAMBURGER BUTTON ── */
 .mob-menu-btn{display:none;position:fixed;top:12px;left:12px;z-index:2000;background:var(--white);border:1px solid var(--border);border-radius:8px;width:40px;height:40px;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh);font-size:18px}
 .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1500}
 .mob-overlay.open{display:block}
 
-/* Ã¢ÂÂÃ¢ÂÂ MOBILE SYNC BAR Ã¢ÂÂÃ¢ÂÂ */
+/* ── MOBILE SYNC BAR ── */
 @media(max-width:640px){
   .mob-menu-btn{display:flex}
   .sync-bar{padding:8px 12px 8px 60px;font-size:11px;gap:6px}
@@ -145,7 +145,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   .ph{flex-wrap:wrap;gap:8px;padding:0 0 12px}
   .pt{font-size:18px}
 
-  /* Metric cards Ã¢ÂÂ 2 per row */
+  /* Metric cards — 2 per row */
   .metrics{grid-template-columns:repeat(2,1fr);gap:8px}
   .mc{padding:12px}
   .mv{font-size:24px}
@@ -153,11 +153,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   /* Dashboard two-col stack */
   .two-col,.three-col{grid-template-columns:1fr}
 
-  /* Tables Ã¢ÂÂ card view on mobile */
+  /* Tables — card view on mobile */
   .tp{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .tw{min-width:0}
 
-  /* Master list table Ã¢ÂÂ show as cards */
+  /* Master list table — show as cards */
   .tbl thead{display:none}
   .tbl tbody tr{display:block;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;padding:0;overflow:hidden}
   .tbl tbody tr:hover td{background:transparent}
@@ -190,7 +190,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   .mob-nav{display:flex}
 }
 
-/* Ã¢ÂÂÃ¢ÂÂ BOTTOM NAV BAR (mobile only) Ã¢ÂÂÃ¢ÂÂ */
+/* ── BOTTOM NAV BAR (mobile only) ── */
 .mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);z-index:1400;padding:6px 0 env(safe-area-inset-bottom,6px)}
 .mob-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;cursor:pointer;color:var(--muted);font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;border:none;background:transparent;-webkit-tap-highlight-color:transparent}
 .mob-nav-item.active{color:var(--b2)}
@@ -243,20 +243,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 <!-- Mobile menu overlay -->
 <div class="mob-overlay" id="mob-overlay" onclick="closeMobMenu()"></div>
 <!-- Hamburger button -->
-<button class="mob-menu-btn" onclick="toggleMobMenu()" aria-label="Menu">Ã¢ÂÂ°</button>
+<button class="mob-menu-btn" onclick="toggleMobMenu()" aria-label="Menu">☰</button>
 
 <nav class="sidebar" id="sidebar">
   <div class="logo">
     <div class="logo-badge">SRA</div>
     <div class="logo-name">Systems R&A (M)</div>
-    <div class="logo-sub">Lead Pipeline ÃÂ· JB</div>
+    <div class="logo-sub">Lead Pipeline · JB</div>
   </div>
   <div class="ns" style="margin-top:6px">
     <div class="nl">Overview</div>
-    <button class="ni active" onclick="showPage('dashboard')"><span style="width:16px;text-align:center">Ã¢ÂÂ</span>Dashboard</button>
-    <button class="ni" onclick="showPage('master')"><span style="width:16px;text-align:center">Ã¢ÂÂ¡</span>Master list</button>
-    <button class="ni" onclick="showPage('kanban')"><span style="width:16px;text-align:center">Ã¢ÂÂ</span>Kanban board</button>
-    <button class="ni" onclick="showPage('quotes')"><span style="width:16px;text-align:center">Ã°ÂÂÂ</span>Quotations</button>
+    <button class="ni active" onclick="showPage('dashboard')"><span style="width:16px;text-align:center">◈</span>Dashboard</button>
+    <button class="ni" onclick="showPage('master')"><span style="width:16px;text-align:center">≡</span>Master list</button>
+    <button class="ni" onclick="showPage('kanban')"><span style="width:16px;text-align:center">⊞</span>Kanban board</button>
+    <button class="ni" onclick="showPage('quotes')"><span style="width:16px;text-align:center">📄</span>Quotations</button>
   </div>
   <div class="ndiv"></div>
   <div class="ns">
@@ -268,7 +268,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   <div class="ndiv"></div>
   <div class="ns">
     <div class="nl">Actions</div>
-    <button class="ni" onclick="showPage('new')"><span style="width:16px;text-align:center">Ã¯Â¼Â</span>Log enquiry</button>
+    <button class="ni" onclick="showPage('new')"><span style="width:16px;text-align:center">＋</span>Log enquiry</button>
   </div>
   <div class="sg">BY STATUS</div>
   <div class="ns">
@@ -284,9 +284,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   <div class="ns" id="source-nav"></div>
   <div class="sg">FILTER</div>
   <div class="ns">
-    <button class="ni" onclick="showPage('custom-filter')"><span style="width:16px;text-align:center">Ã¢ÂÂ</span>Custom filter</button>
+    <button class="ni" onclick="showPage('custom-filter')"><span style="width:16px;text-align:center">⚙</span>Custom filter</button>
   </div>
-  <div class="sf">Systems R&A (M) Sdn Bhd<br>Johor Bahru ÃÂ· Est. 1985<br>HVAC Design &amp; Build</div>
+  <div class="sf">Systems R&A (M) Sdn Bhd<br>Johor Bahru · Est. 1985<br>HVAC Design &amp; Build</div>
 </nav>
 
 <div class="main">
@@ -294,7 +294,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   <div class="sdot" id="sdot"></div>
   <span id="sync-status">Connecting...</span>
   <span id="sync-time"></span>
-  <button class="sbtn" onclick="syncNow()">Ã¢ÂÂ» Sync</button>
+  <button class="sbtn" onclick="syncNow()">↻ Sync</button>
 </div>
 
 <!-- DASHBOARD -->
@@ -303,7 +303,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   <div class="metrics" id="dash-metrics"></div>
   <div class="two-col">
     <div class="panel"><div class="ptitle">Pipeline funnel</div><div id="dash-funnel"></div></div>
-    <div class="panel"><div class="ptitle">Alerts Ã¢ÂÂ action needed</div><div id="dash-alerts"></div></div>
+    <div class="panel"><div class="ptitle">Alerts — action needed</div><div id="dash-alerts"></div></div>
   </div>
   <div class="three-col">
     <div class="panel"><div class="ptitle">By source</div><div id="dash-source"></div></div>
@@ -315,8 +315,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 
 <!-- MASTER LIST -->
 <div class="page" id="page-master">
-  <div class="ph"><div><div class="pt">Master list</div><div class="ps">Synced with Google Sheets ÃÂ· click any row to edit</div></div>
-  <div class="br"><button class="btn" onclick="syncNow()">Ã¢ÂÂ» Sync</button><button class="btn bp" onclick="showPage('new')">+ Log enquiry</button></div></div>
+  <div class="ph"><div><div class="pt">Master list</div><div class="ps">Synced with Google Sheets · click any row to edit</div></div>
+  <div class="br"><button class="btn" onclick="syncNow()">↻ Sync</button><button class="btn bp" onclick="showPage('new')">+ Log enquiry</button></div></div>
   <div class="fb" id="mf">
     <button class="fbt active" onclick="setMF('all',this)">All</button>
     <button class="fbt" onclick="setMF('Hot',this)">Hot</button>
@@ -324,7 +324,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
     <button class="fbt" onclick="setMF('active',this)">Active only</button>
     <button class="fbt" onclick="setMF('Div 2',this)">Div 2</button>
     <button class="fbt" onclick="setMF('Won',this)">Won</button>
-    <div class="sw" style="margin-left:auto"><span class="sic">Ã¢ÂÂ</span><input class="si" id="msearch" placeholder="Search..." oninput="renderMaster()"></div>
+    <div class="sw" style="margin-left:auto"><span class="sic">⌕</span><input class="si" id="msearch" placeholder="Search..." oninput="renderMaster()"></div>
   </div>
   <div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Status</th><th>Quote no.</th><th>F/U</th><th>Next action</th></tr></thead><tbody id="mbody"></tbody></table></div></div>
 </div>
@@ -337,9 +337,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 
 <!-- QUOTATIONS -->
 <div class="page" id="page-quotes">
-  <div class="ph"><div><div class="pt">Quotation list</div><div class="ps">From Q2026 tab ÃÂ· read only ÃÂ· linked to your existing sheet</div></div><button class="btn" onclick="loadQuotes()">Ã¢ÂÂ» Refresh</button></div>
+  <div class="ph"><div><div class="pt">Quotation list</div><div class="ps">From Q2026 tab · read only · linked to your existing sheet</div></div><button class="btn" onclick="loadQuotes()">↻ Refresh</button></div>
   <div class="fb">
-    <div class="sw"><span class="sic">Ã¢ÂÂ</span><input class="si" id="qsearch" placeholder="Search quote or client..." oninput="renderQuotes()" style="width:250px"></div>
+    <div class="sw"><span class="sic">⌕</span><input class="si" id="qsearch" placeholder="Search quote or client..." oninput="renderQuotes()" style="width:250px"></div>
     <button class="fbt active" onclick="setQF('all',this)">All</button>
     <button class="fbt" onclick="setQF('Elson',this)">Elson</button>
     <button class="fbt" onclick="setQF('Daniel',this)">Daniel</button>
@@ -354,21 +354,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 
 <!-- ELSON -->
 <div class="page" id="page-elson">
-  <div class="ph"><div><div class="pt">Elson's pipeline</div><div class="ps">Div 2 ÃÂ· Complex HVAC ÃÂ· High-value</div></div></div>
+  <div class="ph"><div><div class="pt">Elson's pipeline</div><div class="ps">Div 2 · Complex HVAC · High-value</div></div></div>
   <div class="tbanner tbe" id="ebanner"></div>
   <div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Industry</th><th>Solution</th><th>Priority</th><th>Status</th><th>Quote no.</th><th>Location</th><th>Notes</th></tr></thead><tbody id="ebody"></tbody></table></div></div>
 </div>
 
 <!-- DANIEL -->
 <div class="page" id="page-daniel">
-  <div class="ph"><div><div class="pt">Daniel's pipeline</div><div class="ps">Trading ÃÂ· Div 1 follow-ups</div></div></div>
+  <div class="ph"><div><div class="pt">Daniel's pipeline</div><div class="ps">Trading · Div 1 follow-ups</div></div></div>
   <div class="tbanner tbd" id="dbanner"></div>
   <div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Industry</th><th>Solution</th><th>Priority</th><th>Status</th><th>Quote no.</th><th>F/U</th><th>Notes</th></tr></thead><tbody id="dbody"></tbody></table></div></div>
 </div>
 
 <!-- MR LEE -->
 <div class="page" id="page-lee">
-  <div class="ph"><div><div class="pt">Mr Lee's pipeline</div><div class="ps">Simple A/C ÃÂ· Small Div 1 jobs</div></div></div>
+  <div class="ph"><div><div class="pt">Mr Lee's pipeline</div><div class="ps">Simple A/C · Small Div 1 jobs</div></div></div>
   <div class="tbanner tbl2" id="lbanner"></div>
   <div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Industry</th><th>Solution</th><th>Priority</th><th>Status</th><th>Quote no.</th><th>F/U</th><th>Notes</th></tr></thead><tbody id="lbody"></tbody></table></div></div>
 </div>
@@ -378,11 +378,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   <div class="ph"><div><div class="pt">Log new enquiry</div><div class="ps">Saved directly to Google Sheets</div></div></div>
   <div class="panel">
 
-    <!-- Ã¢ÂÂÃ¢ÂÂ PART 1: CONTACT INFO Ã¢ÂÂÃ¢ÂÂ -->
+    <!-- ── PART 1: CONTACT INFO ── -->
     <div class="fsec">
       <div class="fsec-title">Contact information</div>
 
-      <!-- Business card upload Ã¢ÂÂ Front & Back -->
+      <!-- Business card upload — Front & Back -->
       <input type="file" id="card-input-1" class="card-hidden-input" accept="image/*">
       <input type="file" id="card-input-2" class="card-hidden-input" accept="image/*">
       <div class="card-slots">
@@ -394,15 +394,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
                ondragover="event.preventDefault();this.classList.add('drag-over')"
                ondragleave="this.classList.remove('drag-over')"
                ondrop="handleCardDrop(event,1)">
-            <div class="card-upload-icon">Ã°ÂÂÂ</div>
+            <div class="card-upload-icon">📇</div>
             <div class="card-upload-label">
               <strong>Card 1</strong>
-              Click ÃÂ· Drag ÃÂ· Paste
+              Click · Drag · Paste
             </div>
           </div>
           <div class="card-preview" id="card-preview-1">
             <img id="card-img-1" src="" alt="Card 1">
-            <button class="card-preview-remove" onclick="removeCard(1)" title="Remove">ÃÂ</button>
+            <button class="card-preview-remove" onclick="removeCard(1)" title="Remove">×</button>
           </div>
         </div>
         <!-- Back -->
@@ -413,20 +413,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
                ondragover="event.preventDefault();this.classList.add('drag-over')"
                ondragleave="this.classList.remove('drag-over')"
                ondrop="handleCardDrop(event,2)">
-            <div class="card-upload-icon">Ã°ÂÂÂ</div>
+            <div class="card-upload-icon">🔄</div>
             <div class="card-upload-label">
               <strong>Card 2</strong>
-              Click ÃÂ· Drag ÃÂ· Paste
+              Click · Drag · Paste
             </div>
           </div>
           <div class="card-preview" id="card-preview-2">
             <img id="card-img-2" src="" alt="Card 2">
-            <button class="card-preview-remove" onclick="removeCard(2)" title="Remove">ÃÂ</button>
+            <button class="card-preview-remove" onclick="removeCard(2)" title="Remove">×</button>
           </div>
         </div>
       </div>
       <button class="card-ocr-btn" id="card-ocr-btn" onclick="extractCardData()">
-        Ã¢ÂÂ¦ Extract data from card
+        ✦ Extract data from card
       </button>
 
       <div class="fg" style="margin-top:14px">
@@ -438,25 +438,25 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
         <div class="fgp"><label class="flb">Site location</label><input class="fi" id="flo" placeholder="e.g. Pasir Gudang, Johor"></div>
       </div>
       <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
-        <button class="export-contact-btn" onclick="exportContact()">Ã°ÂÂÂ Copy contact</button>
-        <span class="copied-flash" id="copied-flash">Ã¢ÂÂ Copied!</span>
+        <button class="export-contact-btn" onclick="exportContact()">📋 Copy contact</button>
+        <span class="copied-flash" id="copied-flash">✓ Copied!</span>
       </div>
     </div>
 
-    <!-- Ã¢ÂÂÃ¢ÂÂ PART 2: ENQUIRY DETAILS Ã¢ÂÂÃ¢ÂÂ -->
+    <!-- ── PART 2: ENQUIRY DETAILS ── -->
     <div class="fsec-title">Enquiry details</div>
     <div class="fg">
       <div class="fgp"><label class="flb">Source channel</label>
-        <select class="fse" id="fso"><option>WhatsApp</option><option>Email</option><option>Website form</option><option>Phone call</option><option>BNI referral</option><option>Friend referral</option><option>Salesman Ã¢ÂÂ Daniel</option><option>Salesman Ã¢ÂÂ Mr Lee</option><option>Walk-in</option></select>
+        <select class="fse" id="fso"><option>WhatsApp</option><option>Email</option><option>Website form</option><option>Phone call</option><option>BNI referral</option><option>Friend referral</option><option>Salesman — Daniel</option><option>Salesman — Mr Lee</option><option>Walk-in</option></select>
       </div>
       <div class="fgp"><label class="flb">Industry</label>
         <select class="fse" id="fi2"><option>Medical device</option><option>Semiconductor</option><option>F&amp;B / Food tech</option><option>General industrial</option><option>Pharmaceutical</option><option>Other</option></select>
       </div>
       <div class="fgp"><label class="flb">Solution type</label>
-        <select class="fse" id="fsl"><option>CHW Ã¢ÂÂ chilled water system</option><option>CT Ã¢ÂÂ cooling tower</option><option>EAC Ã¢ÂÂ evaporative air cooler</option><option>AHU Ã¢ÂÂ air handling unit</option><option>Cleanroom HVAC</option><option>Industrial ventilation</option><option>Machine / process cooling</option><option>Trading Ã¢ÂÂ chiller</option><option>Trading Ã¢ÂÂ pump</option><option>Simple A/C</option><option>Unknown / TBC</option></select>
+        <select class="fse" id="fsl"><option>CHW — chilled water system</option><option>CT — cooling tower</option><option>EAC — evaporative air cooler</option><option>AHU — air handling unit</option><option>Cleanroom HVAC</option><option>Industrial ventilation</option><option>Machine / process cooling</option><option>Trading — chiller</option><option>Trading — pump</option><option>Simple A/C</option><option>Unknown / TBC</option></select>
       </div>
       <div class="fgp"><label class="flb">Division</label>
-        <select class="fse" id="fdv"><option value="Div 2">Div 2 Ã¢ÂÂ Elson-led (complex)</option><option value="Div 1">Div 1 Ã¢ÂÂ Foreman-led (standard)</option><option value="TBC">TBC Ã¢ÂÂ pending</option></select>
+        <select class="fse" id="fdv"><option value="Div 2">Div 2 — Elson-led (complex)</option><option value="Div 1">Div 1 — Foreman-led (standard)</option><option value="TBC">TBC — pending</option></select>
       </div>
       <div class="fgp"><label class="flb">Assigned to</label>
         <select class="fse" id="fas"><option>Elson</option><option>Daniel</option><option>Mr Lee</option></select>
@@ -476,7 +476,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
     <div class="fa">
       <button class="btn bp" id="save-btn" onclick="saveLead()">Save to Google Sheets</button>
       <button class="btn" onclick="clearForm()">Clear</button>
-      <span class="toast" id="form-toast">Ã¢ÂÂ Saved to Google Sheets</span>
+      <span class="toast" id="form-toast">✓ Saved to Google Sheets</span>
     </div>
   </div>
 </div>
@@ -484,7 +484,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 </div>
 <script>
 
-// Ã¢ÂÂÃ¢ÂÂ MOVE FILTER PAGES INTO .main after DOM loads Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── MOVE FILTER PAGES INTO .main after DOM loads ───────
 document.addEventListener('DOMContentLoaded', function(){
   var mainEl = document.querySelector('.main');
   if(!mainEl) return;
@@ -499,7 +499,7 @@ var API='https://script.google.com/macros/s/AKfycbycZtgYhVs5znl-Qq1ihOTONMdlbTEi
 var leads=[],quotes=[],mf='all',qf='all',curId=null;
 var today=new Date().toISOString().slice(0,10);
 
-// Ã¢ÂÂÃ¢ÂÂ API Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── API ──────────────────────────────────────────────
 function apiGet(action){
   return fetch(API+'?action='+action)
     .then(function(r){return r.json();});
@@ -510,7 +510,7 @@ function apiPost(action,lead){
     .then(function(r){return r.json();});
 }
 
-// Ã¢ÂÂÃ¢ÂÂ HELPERS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── HELPERS ───────────────────────────────────────────
 function lv(l,k){return l&&l[k]!==undefined?String(l[k]):''}
 function isActive(l){return['New','Qualifying','Site visit scheduled','Site visit done','Proposal','Quoted'].includes(lv(l,'Status'))}
 function isOD(l){var d=lv(l,'Next action date');return d&&d<today&&isActive(l)}
@@ -518,9 +518,9 @@ function pb(p){var m={Hot:'bh',Warm:'bw',Cold:'bc'};return'<span class="badge '+
 function sb(s){var m={'New':'bnew','Qualifying':'bq','Site visit scheduled':'bsi','Site visit done':'bsi','Proposal':'bpr','Quoted':'bqu','Won':'bwon','Lost':'blo','Archived':'bar'};return'<span class="badge '+(m[s]||'bnew')+'">'+s+'</span>'}
 function ab(a){var m={Elson:'be',Daniel:'bd','Mr Lee':'bl2'};return'<span class="badge '+(m[a]||'be')+'">'+a+'</span>'}
 function db(d){return'<span class="badge '+(d==='Div 2'?'bd2':'bd1')+'">'+d+'</span>'}
-function ss(s){var m={'CHW Ã¢ÂÂ chilled water system':'CHW','CT Ã¢ÂÂ cooling tower':'CT','EAC Ã¢ÂÂ evaporative air cooler':'EAC','AHU Ã¢ÂÂ air handling unit':'AHU','Cleanroom HVAC':'Cleanroom','Industrial ventilation':'Ventilation','Machine / process cooling':'Process','Trading Ã¢ÂÂ chiller':'Chiller','Trading Ã¢ÂÂ pump':'Pump','Simple A/C':'Simple A/C','Unknown / TBC':'TBC'};return m[s]||s}
+function ss(s){var m={'CHW — chilled water system':'CHW','CT — cooling tower':'CT','EAC — evaporative air cooler':'EAC','AHU — air handling unit':'AHU','Cleanroom HVAC':'Cleanroom','Industrial ventilation':'Ventilation','Machine / process cooling':'Process','Trading — chiller':'Chiller','Trading — pump':'Pump','Simple A/C':'Simple A/C','Unknown / TBC':'TBC'};return m[s]||s}
 
-// Ã¢ÂÂÃ¢ÂÂ SYNC STATUS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── SYNC STATUS ───────────────────────────────────────
 function setSS(st,msg){
   var dot=document.getElementById('sdot'),el=document.getElementById('sync-status');
   if(!dot||!el)return;
@@ -533,21 +533,21 @@ function setSS(st,msg){
   if(st==='ok'){document.getElementById('sync-time').textContent='Last sync: '+new Date().toLocaleTimeString('en-MY');}
 }
 
-// Ã¢ÂÂÃ¢ÂÂ SYNC FROM SHEETS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── SYNC FROM SHEETS ──────────────────────────────────
 async function syncNow(){
   setSS('sync','Syncing from Google Sheets...');
   try{
     var d=await apiGet('getLeads');
     if(d.ok&&d.data){
       leads=d.data;
-      setSS('ok','Synced Ã¢ÂÂ '+leads.length+' leads');
+      setSS('ok','Synced — '+leads.length+' leads');
       renderCurrent();
       buildSourceNav();
     } else {
       setSS('err','Sync error: '+(d.error||'Unknown'));
     }
   } catch(e){
-    setSS('err','Cannot reach Sheets Ã¢ÂÂ '+e.message);
+    setSS('err','Cannot reach Sheets — '+e.message);
   }
 }
 
@@ -558,7 +558,7 @@ async function loadQuotes(){
   } catch(e){console.warn('Quotes failed:',e.message);}
 }
 
-// Ã¢ÂÂÃ¢ÂÂ NAVIGATION Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── NAVIGATION ────────────────────────────────────────
 function showPage(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});
@@ -583,7 +583,7 @@ function renderCurrent(){
   if(a)showPage(a.id.replace('page-',''));
 }
 
-// Ã¢ÂÂÃ¢ÂÂ DASHBOARD Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── DASHBOARD ─────────────────────────────────────────
 function renderDash(){
   document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-MY',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   var act=leads.filter(isActive),hot=leads.filter(function(l){return lv(l,'Priority')==='Hot'&&isActive(l);});
@@ -617,9 +617,9 @@ function renderDash(){
   var alts=[];
   leads.forEach(function(l){
     var fu=parseInt(lv(l,'Follow-up count')||0);
-    if(fu>=2&&isActive(l))alts.push({d:'ard',t:lv(l,'Client name')+' Ã¢ÂÂ flag for archive',m:fu+' follow-ups, no reply ÃÂ· '+lv(l,'Assigned to')});
-    else if(isOD(l))alts.push({d:'aam',t:lv(l,'Client name')+' Ã¢ÂÂ follow-up overdue',m:'Action: '+lv(l,'Next action date')+' ÃÂ· '+lv(l,'Assigned to')});
-    else if(lv(l,'Priority')==='Hot'&&lv(l,'Status')==='New')alts.push({d:'aam',t:lv(l,'Client name')+' Ã¢ÂÂ hot lead not yet contacted',m:'Source: '+lv(l,'Source channel')});
+    if(fu>=2&&isActive(l))alts.push({d:'ard',t:lv(l,'Client name')+' — flag for archive',m:fu+' follow-ups, no reply · '+lv(l,'Assigned to')});
+    else if(isOD(l))alts.push({d:'aam',t:lv(l,'Client name')+' — follow-up overdue',m:'Action: '+lv(l,'Next action date')+' · '+lv(l,'Assigned to')});
+    else if(lv(l,'Priority')==='Hot'&&lv(l,'Status')==='New')alts.push({d:'aam',t:lv(l,'Client name')+' — hot lead not yet contacted',m:'Source: '+lv(l,'Source channel')});
   });
   if(!alts.length)alts.push({d:'agr',t:'All leads on track',m:'No overdue follow-ups today'});
   document.getElementById('dash-alerts').innerHTML=alts.slice(0,6).map(function(a){
@@ -629,7 +629,7 @@ function renderDash(){
   var sc={};leads.forEach(function(l){var k=lv(l,'Source channel');sc[k]=(sc[k]||0)+1;});
   var sm=Math.max.apply(null,Object.values(sc).concat([1]));
   document.getElementById('dash-source').innerHTML=Object.entries(sc).sort(function(a,b){return b[1]-a[1];}).slice(0,7).map(function(kv){
-    return '<div class="br2"><div class="bl" title="'+kv[0]+'">'+kv[0].replace('Salesman Ã¢ÂÂ ','')+'</div><div class="bt"><div class="bf" style="width:'+Math.round(kv[1]/sm*100)+'%;background:var(--cold)"></div></div><div class="bn">'+kv[1]+'</div></div>';
+    return '<div class="br2"><div class="bl" title="'+kv[0]+'">'+kv[0].replace('Salesman — ','')+'</div><div class="bt"><div class="bf" style="width:'+Math.round(kv[1]/sm*100)+'%;background:var(--cold)"></div></div><div class="bn">'+kv[1]+'</div></div>';
   }).join('');
 
   var so={};leads.forEach(function(l){var k=ss(lv(l,'Solution type'));so[k]=(so[k]||0)+1;});
@@ -642,16 +642,16 @@ function renderDash(){
   document.getElementById('dash-team').innerHTML=['Elson','Daniel','Mr Lee'].map(function(t){
     var m=leads.filter(function(l){return lv(l,'Assigned to')===t;}),am=m.filter(isActive).length,hm=m.filter(function(l){return lv(l,'Priority')==='Hot'&&isActive(l);}).length;
     var pct=Math.round(m.length/Math.max(leads.length,1)*100);
-    return '<div style="margin-bottom:13px"><div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">'+ab(t)+'<span style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+am+' active ÃÂ· '+hm+' hot</span></div><div class="bt" style="height:7px"><div class="bf" style="width:'+pct+'%;background:'+tc[t]+'"></div></div></div>';
+    return '<div style="margin-bottom:13px"><div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">'+ab(t)+'<span style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+am+' active · '+hm+' hot</span></div><div class="bt" style="height:7px"><div class="bf" style="width:'+pct+'%;background:'+tc[t]+'"></div></div></div>';
   }).join('');
 
   var hl=leads.filter(function(l){return lv(l,'Priority')==='Hot'&&isActive(l);});
   document.getElementById('dash-hot').innerHTML='<thead><tr><th>Client</th><th>Solution</th><th>Status</th><th>Assigned</th><th>Quote no.</th><th>Notes</th></tr></thead><tbody>'+hl.map(function(l){
-    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'Ã¢ÂÂ')+'</td><td style="font-size:12px;color:var(--muted);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'</td></tr>';
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'</td></tr>';
   }).join('')+'</tbody>';
 }
 
-// Ã¢ÂÂÃ¢ÂÂ MASTER LIST Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── MASTER LIST ───────────────────────────────────────
 function setMF(f,btn){mf=f;document.querySelectorAll('#mf .fbt').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderMaster();}
 function renderMaster(){
   var q=(document.getElementById('msearch')?.value||'').toLowerCase();
@@ -663,22 +663,22 @@ function renderMaster(){
   else if(mf==='Won')f=f.filter(function(l){return lv(l,'Status')==='Won';});
   if(q)f=f.filter(function(l){return(lv(l,'Client name')+lv(l,'Contact person & number')+lv(l,'Problem statement')).toLowerCase().includes(q);});
   document.getElementById('mbody').innerHTML=f.length?f.map(function(l){
-    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Source channel')+'</td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+db(lv(l,'Division'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td>'+pb(lv(l,'Priority'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'Ã¢ÂÂ')+'</td><td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'Ã¢ÂÂ')+'</td></tr>';
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Source channel')+'</td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+db(lv(l,'Division'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td>'+pb(lv(l,'Priority'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td></tr>';
   }).join(''):'<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--muted);font-family:var(--mono)">No leads found</td></tr>';
 }
 
-// Ã¢ÂÂÃ¢ÂÂ KANBAN Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── KANBAN ────────────────────────────────────────────
 function renderKanban(){
   var cols=['New','Qualifying','Site visit scheduled','Site visit done','Proposal','Quoted','Won','Lost'];
   document.getElementById('kboard').innerHTML=cols.map(function(col){
     var items=leads.filter(function(l){return lv(l,'Status')===col;});
     return '<div class="kc"><div class="kh"><span>'+col+'</span><span class="kn">'+items.length+'</span></div>'+items.map(function(l){
-      return '<div class="kcard" onclick="openModal(\''+lv(l,'ID')+'\')"><div class="kname">'+lv(l,'Client name')+'</div><div class="ktags">'+pb(lv(l,'Priority'))+ab(lv(l,'Assigned to'))+'</div><div class="kmeta">'+ss(lv(l,'Solution type'))+' ÃÂ· '+(lv(l,'Industry')||'').split(' ')[0]+'</div></div>';
+      return '<div class="kcard" onclick="openModal(\''+lv(l,'ID')+'\')"><div class="kname">'+lv(l,'Client name')+'</div><div class="ktags">'+pb(lv(l,'Priority'))+ab(lv(l,'Assigned to'))+'</div><div class="kmeta">'+ss(lv(l,'Solution type'))+' · '+(lv(l,'Industry')||'').split(' ')[0]+'</div></div>';
     }).join('')+'</div>';
   }).join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ QUOTES Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── QUOTES ────────────────────────────────────────────
 function setQF(f,btn){qf=f;document.querySelectorAll('#page-quotes .fbt').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderQuotes();}
 function renderQuotes(){
   var q=(document.getElementById('qsearch')?.value||'').toLowerCase();
@@ -694,7 +694,7 @@ function renderQuotes(){
   }).join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ TEAM VIEWS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── TEAM VIEWS ────────────────────────────────────────
 function renderTeam(pid,name){
   var mine=leads.filter(function(l){return lv(l,'Assigned to')===name&&isActive(l);});
   var hot=mine.filter(function(l){return lv(l,'Priority')==='Hot';}).length;
@@ -705,11 +705,11 @@ function renderTeam(pid,name){
     '<div class="tmc"><div class="tml">Hot</div><div class="tmv" style="color:var(--hot)">'+hot+'</div></div>'+
     '<div class="tmc"><div class="tml">Overdue</div><div class="tmv" style="color:'+(od>0?'var(--hot)':tc)+'">'+od+'</div></div>';
   document.getElementById(pid+'body').innerHTML=mine.length?mine.map(function(l){
-    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+pb(lv(l,'Priority'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'Ã¢ÂÂ')+'</td><td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'</td></tr>';
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+pb(lv(l,'Priority'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'</td></tr>';
   }).join(''):'<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted);font-family:var(--mono)">No active leads</td></tr>';
 }
 
-// Ã¢ÂÂÃ¢ÂÂ MODAL Ã¢ÂÂ FULL EDIT Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── MODAL — FULL EDIT ─────────────────────────────────
 function sel(id,opts,val){
   var sid=id.replace(/ /g,'_');
   return '<select class="ese" id="m_'+sid+'">'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+o+'</option>';}).join('')+'</select>';
@@ -734,16 +734,16 @@ function openModal(id){
     '</div></div>'+
     '<div class="ms2"><div class="mst">Client details</div><div class="fg2">'+
       '<div class="eg"><label class="el">Client name</label><input class="ei" id="m_name" value="'+lv(l,'Client name')+'"></div>'+
-      '<div class="eg"><label class="el">Contact name</label><input class="ei" id="m_cname" value="'+(lv(l,'Contact name')||lv(l,'Contact person & number').split('ÃÂ·')[0].trim())+'"></div>'+
-      '<div class="eg"><label class="el">Phone number</label><input class="ei" id="m_phone" value="'+(lv(l,'Phone number')||lv(l,'Contact person & number').split('ÃÂ·')[1]?.trim()||'')+'"></div>'+
+      '<div class="eg"><label class="el">Contact name</label><input class="ei" id="m_cname" value="'+(lv(l,'Contact name')||lv(l,'Contact person & number').split('·')[0].trim())+'"></div>'+
+      '<div class="eg"><label class="el">Phone number</label><input class="ei" id="m_phone" value="'+(lv(l,'Phone number')||lv(l,'Contact person & number').split('·')[1]?.trim()||'')+'"></div>'+
       '<div class="eg"><label class="el">Job title</label><input class="ei" id="m_jobtitle" value="'+(lv(l,'Job title')||'')+'"></div>'+
       '<div class="eg"><label class="el">Email</label><input class="ei" id="m_email" type="email" value="'+(lv(l,'Email')||'')+'"></div>'+
       '<div class="eg"><label class="el">Site location</label><input class="ei" id="m_location" value="'+(lv(l,'Site location')||'')+'"></div>'+
     '</div></div>'+
     '<div class="ms2"><div class="mst">Enquiry details</div><div class="fg2">'+
-      '<div class="eg"><label class="el">Source</label>'+sel('Source channel',['WhatsApp','Email','Website form','Phone call','BNI referral','Friend referral','Salesman Ã¢ÂÂ Daniel','Salesman Ã¢ÂÂ Mr Lee','Walk-in'],lv(l,'Source channel'))+'</div>'+
+      '<div class="eg"><label class="el">Source</label>'+sel('Source channel',['WhatsApp','Email','Website form','Phone call','BNI referral','Friend referral','Salesman — Daniel','Salesman — Mr Lee','Walk-in'],lv(l,'Source channel'))+'</div>'+
       '<div class="eg"><label class="el">Industry</label>'+sel('Industry',['Medical device','Semiconductor','F&B / Food tech','General industrial','Pharmaceutical','Other'],lv(l,'Industry'))+'</div>'+
-      '<div class="eg"><label class="el">Solution type</label>'+sel('Solution type',['CHW Ã¢ÂÂ chilled water system','CT Ã¢ÂÂ cooling tower','EAC Ã¢ÂÂ evaporative air cooler','AHU Ã¢ÂÂ air handling unit','Cleanroom HVAC','Industrial ventilation','Machine / process cooling','Trading Ã¢ÂÂ chiller','Trading Ã¢ÂÂ pump','Simple A/C','Unknown / TBC'],lv(l,'Solution type'))+'</div>'+
+      '<div class="eg"><label class="el">Solution type</label>'+sel('Solution type',['CHW — chilled water system','CT — cooling tower','EAC — evaporative air cooler','AHU — air handling unit','Cleanroom HVAC','Industrial ventilation','Machine / process cooling','Trading — chiller','Trading — pump','Simple A/C','Unknown / TBC'],lv(l,'Solution type'))+'</div>'+
       '<div class="eg"><label class="el">Install type</label>'+sel('New or replacement',['New installation','Replacement','Upgrade','Unknown'],lv(l,'New or replacement'))+'</div>'+
     '</div></div>'+
     '<div class="ms2"><div class="mst">Notes</div>'+
@@ -753,7 +753,7 @@ function openModal(id){
     '<div class="mf">'+
       '<button class="btn bp bsm" onclick="saveEdit()">Save to Sheets</button>'+
       '<button class="btn bsm" onclick="closeModal()">Cancel</button>'+
-      '<button class="export-contact-btn" onclick="exportContact()">Ã°ÂÂÂ Copy contact</button>'+
+      '<button class="export-contact-btn" onclick="exportContact()">📋 Copy contact</button>'+
       '<span class="copied-flash" id="copied-flash-modal"></span>'+
       '<span class="stoa" id="stoa"></span>'+
     '</div>';
@@ -785,7 +785,7 @@ async function saveModal(){
   l['Phone number']=document.getElementById('m_phone')?document.getElementById('m_phone').value:'';
   l['Job title']=document.getElementById('m_jobtitle')?document.getElementById('m_jobtitle').value:'';
   var cname=l['Contact name'],cphone=l['Phone number'];
-  l['Contact person & number']=cname&&cphone?cname+' ÃÂ· '+cphone:cname||cphone||'';
+  l['Contact person & number']=cname&&cphone?cname+' · '+cphone:cname||cphone||'';
   l['Email']=document.getElementById('m_email')?document.getElementById('m_email').value:'';
   l['Site location']=document.getElementById('m_location')?document.getElementById('m_location').value:'';
   l['Source channel']=gv('Source channel');
@@ -805,9 +805,9 @@ async function saveModal(){
   try{
     var r=await apiPost('updateLead',l);
     if(r.ok){
-      setSS('ok','Saved Ã¢ÂÂ '+lv(l,'Client name'));
-      if(btn){btn.textContent='Ã¢ÂÂ Updated';btn.style.background='var(--won)';}
-      if(stoa){stoa.textContent='Ã¢ÂÂ Saved to Sheets';stoa.style.display='inline';}
+      setSS('ok','Saved — '+lv(l,'Client name'));
+      if(btn){btn.textContent='✓ Updated';btn.style.background='var(--won)';}
+      if(stoa){stoa.textContent='✓ Saved to Sheets';stoa.style.display='inline';}
       setTimeout(function(){
         closeModal();
         renderCurrent();
@@ -825,7 +825,7 @@ async function saveModal(){
 function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';curId=null;}
 function closeMO(e){if(e.target===document.getElementById('modal'))closeModal();}
 
-// Ã¢ÂÂÃ¢ÂÂ NEW LEAD Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── NEW LEAD ──────────────────────────────────────────
 async function saveLead(){
   var name=document.getElementById('fn').value.trim();
   if(!name){alert('Please enter a client name.');return;}
@@ -836,7 +836,7 @@ async function saveLead(){
     'Phone number':document.getElementById('fph').value,
     'Job title':document.getElementById('fjt').value,
     'Business card':'', // filled after Drive upload
-    'Contact person & number':(document.getElementById('fcn').value+' ÃÂ· '+document.getElementById('fph').value).trim().replace(/^ÃÂ·\s*|\s*ÃÂ·$/g,''),
+    'Contact person & number':(document.getElementById('fcn').value+' · '+document.getElementById('fph').value).trim().replace(/^·\s*|\s*·$/g,''),
     'Contact name':document.getElementById('fcn').value,
     'Phone number':document.getElementById('fph').value,
     'Job title':document.getElementById('fjt').value,
@@ -881,7 +881,7 @@ async function saveLead(){
     if(r.ok){
       if(r.data)leads.unshift(r.data);
       else leads.unshift(lead);
-      setSS('ok','Saved Ã¢ÂÂ '+name);
+      setSS('ok','Saved — '+name);
       clearForm();
       var t=document.getElementById('form-toast');
       if(t){t.style.display='inline';setTimeout(function(){t.style.display='none';},3000);}
@@ -901,7 +901,7 @@ function clearForm(){
   var btn=document.getElementById('save-btn');if(btn){btn.disabled=false;btn.textContent='Save to Google Sheets';}
 }
 
-// Ã¢ÂÂÃ¢ÂÂ INIT Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── INIT ──────────────────────────────────────────────
 async function init(){
   await syncNow();
   setInterval(syncNow,5*60*1000);
@@ -909,7 +909,7 @@ async function init(){
 init();
 
 
-// Ã¢ÂÂÃ¢ÂÂ FILTER PAGES: move into .main after DOM loads Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── FILTER PAGES: move into .main after DOM loads ──────
 document.addEventListener('DOMContentLoaded', function(){
   var mainEl = document.querySelector('.main');
   if(!mainEl) return;
@@ -921,7 +921,7 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
-// Ã¢ÂÂÃ¢ÂÂ STATUS VIEWS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── STATUS VIEWS ────────────────────────────────────────
 var STATUS_MAP = {
   'st-new':        {statuses:['New'],                                  bid:'sb-new'},
   'st-qualifying': {statuses:['Qualifying'],                           bid:'sb-qualifying'},
@@ -948,15 +948,15 @@ function renderStatusView(id){
       '<td>'+ab(lv(l,'Assigned to'))+'</td>'+
       '<td>'+pb(lv(l,'Priority'))+'</td>'+
       (isWonQuoted
-        ?'<td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'Ã¢ÂÂ')+'</td>'
-         +'<td style="font-size:12px;font-family:var(--mono);color:var(--won)">'+(lv(l,'Quote value')?'RM '+parseFloat(lv(l,'Quote value')).toLocaleString():'Ã¢ÂÂ')+'</td>'
+        ?'<td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td>'
+         +'<td style="font-size:12px;font-family:var(--mono);color:var(--won)">'+(lv(l,'Quote value')?'RM '+parseFloat(lv(l,'Quote value')).toLocaleString():'—')+'</td>'
         :'<td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td>'
-         +'<td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'Ã¢ÂÂ')+'</td>')+
+         +'<td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td>')+
       '</tr>';
   }).join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ SOURCE NAV + VIEW Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── SOURCE NAV + VIEW ────────────────────────────────────
 var curSource='';
 function buildSourceNav(){
   var nav=document.getElementById('source-nav'); if(!nav)return;
@@ -991,12 +991,12 @@ function renderSourceView(){
       '<td>'+ab(lv(l,'Assigned to'))+'</td>'+
       '<td>'+pb(lv(l,'Priority'))+'</td>'+
       '<td>'+sb(lv(l,'Status'))+'</td>'+
-      '<td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'Ã¢ÂÂ')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td>'+
       '</tr>';
   }).join('');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ CUSTOM FILTER Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── CUSTOM FILTER ────────────────────────────────────────
 function renderCF(){
   var status  =(document.getElementById('cf-status')  ||{}).value||'';
   var priority=(document.getElementById('cf-priority') ||{}).value||'';
@@ -1033,9 +1033,9 @@ function renderCF(){
       '<td>'+ab(lv(l,'Assigned to'))+'</td>'+
       '<td>'+pb(lv(l,'Priority'))+'</td>'+
       '<td>'+sb(lv(l,'Status'))+'</td>'+
-      '<td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'Ã¢ÂÂ')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td>'+
       '<td style="font-size:12px;text-align:center">'+(lv(l,'Follow-up count')||0)+'</td>'+
-      '<td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'Ã¢ÂÂ')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td>'+
       '</tr>';
   }).join('');
 }
@@ -1048,7 +1048,7 @@ function resetCF(){
 }
 
 
-// Ã¢ÂÂÃ¢ÂÂ MOBILE MENU Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── MOBILE MENU ─────────────────────────────────────────
 function toggleMobMenu(){
   var sb=document.getElementById('sidebar');
   var ov=document.getElementById('mob-overlay');
@@ -1064,7 +1064,7 @@ function setMobNav(btn){
   btn.classList.add('active');
 }
 
-// Ã¢ÂÂÃ¢ÂÂ CLOSE SIDEBAR ON NAV CLICK (mobile) Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── CLOSE SIDEBAR ON NAV CLICK (mobile) ─────────────────
 (function(){
   var orig = window.showPage;
   window.showPage = function(id){
@@ -1073,7 +1073,7 @@ function setMobNav(btn){
   };
 })();
 
-// Ã¢ÂÂÃ¢ÂÂ ADD data-label TO TABLE CELLS FOR MOBILE CARD VIEW Ã¢ÂÂÃ¢ÂÂ
+// ── ADD data-label TO TABLE CELLS FOR MOBILE CARD VIEW ──
 function addTableLabels(){
   document.querySelectorAll('.tbl').forEach(function(tbl){
     var headers=Array.from(tbl.querySelectorAll('thead th')).map(function(th){return th.textContent.trim();});
@@ -1100,7 +1100,7 @@ function addTableLabels(){
 })();
 
 
-// Ã¢ÂÂÃ¢ÂÂ BUSINESS CARD UPLOAD (dual: front + back) Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── BUSINESS CARD UPLOAD (dual: front + back) ──────────
 var cardDataURL  = null;  // front (slot 1)
 var cardDataURL2 = null;  // back  (slot 2)
 // Track which slot paste goes to (last clicked)
@@ -1117,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(area) area.addEventListener('click', function(){ lastCardSlot = slot; });
   });
 
-  // Paste support Ã¢ÂÂ goes to last-clicked slot
+  // Paste support — goes to last-clicked slot
   document.addEventListener('paste', function(e){
     if(document.querySelector('#page-new.active')){
       var items = (e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {}).items || [];
@@ -1168,16 +1168,16 @@ function removeCard(slot){
     document.getElementById('card-ocr-btn').style.display = 'none';
 }
 
-// Ã¢ÂÂÃ¢ÂÂ GEMINI OCR Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── GEMINI OCR ───────────────────────────────────────────
 
 async function extractCardData(){
   if(!cardDataURL && !cardDataURL2){ alert('Please upload a business card first.'); return; }
   var btn = document.getElementById('card-ocr-btn');
-  btn.textContent = 'Ã¢ÂÂ³ Analysing card...';
+  btn.textContent = '⏳ Analysing card...';
   btn.disabled = true;
 
   try {
-    // Send images to Apps Script (proxy) Ã¢ÂÂ Gemini key stays private server-side
+    // Send images to Apps Script (proxy) — Gemini key stays private server-side
     var resp = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1202,22 +1202,22 @@ async function extractCardData(){
     if(info.email)   document.getElementById('fe').value  = info.email;
     if(info.address) document.getElementById('flo').value = info.address;
 
-    btn.textContent = 'Ã¢ÂÂ Done Ã¢ÂÂ please review fields';
+    btn.textContent = '✓ Done — please review fields';
     btn.style.background = 'var(--won)';
-    setTimeout(function(){ btn.textContent='Ã¢ÂÂ¦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 3000);
+    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 3000);
 
   } catch(e) {
     console.error('Extract error:', e.message);
-    btn.textContent = 'Ã¢ÂÂ ' + (e.message||'Failed').substring(0,50);
+    btn.textContent = '✗ ' + (e.message||'Failed').substring(0,50);
     btn.style.background = '#ef4444';
-    setTimeout(function(){ btn.textContent='Ã¢ÂÂ¦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 4000);
+    setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 4000);
   }
 }
 
 
-// Ã¢ÂÂÃ¢ÂÂ GOOGLE DRIVE UPLOAD (via Apps Script) Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── GOOGLE DRIVE UPLOAD (via Apps Script) ────────────────
 async function uploadCardToDrive(base64Data, filename, mimeType) {
-    const response = await fetch(SCRIPT_URL, {
+    const response = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1233,7 +1233,7 @@ async function uploadCardToDrive(base64Data, filename, mimeType) {
   }
 
 
-// Ã¢ÂÂÃ¢ÂÂ EXPORT CONTACT (one-click copy) Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+// ── EXPORT CONTACT (one-click copy) ─────────────────────
 function exportContact(){
   // Try from open modal first
   if(document.getElementById('modal')?.classList.contains('open') && curId){
@@ -1242,8 +1242,8 @@ function exportContact(){
       var parts = [
         lv(lead,'Client name'),
         lv(lead,'Site location'),
-        lv(lead,'Contact name') || lv(lead,'Contact person & number').split('ÃÂ·')[0].trim(),
-        lv(lead,'Phone number') || (lv(lead,'Contact person & number').split('ÃÂ·')[1]||'').trim(),
+        lv(lead,'Contact name') || lv(lead,'Contact person & number').split('·')[0].trim(),
+        lv(lead,'Phone number') || (lv(lead,'Contact person & number').split('·')[1]||'').trim(),
         lv(lead,'Job title'),
         lv(lead,'Email')
       ].filter(Boolean);
@@ -1296,7 +1296,7 @@ function fallbackCopy(text, cb){
   <div class="modal">
     <div class="mh">
       <div class="mtitle" id="mtitle"></div>
-      <button class="mclose" onclick="closeModal()">ÃÂ</button>
+      <button class="mclose" onclick="closeModal()">×</button>
     </div>
     <div class="mb" id="modalbody"></div>
   </div>
@@ -1314,7 +1314,7 @@ function fallbackCopy(text, cb){
 <div class="page" id="page-source-view"><div class="ph"><div><div class="pt" id="src-page-title">By Source</div><div class="ps" id="src-page-sub"></div></div></div><div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Status</th><th>Next action</th></tr></thead><tbody id="sb-source"></tbody></table></div></div></div>
 <!-- CUSTOM FILTER PAGE -->
 <div class="page" id="page-custom-filter">
-  <div class="ph"><div><div class="pt">Custom filter</div><div class="ps">Session only ÃÂ· resets on refresh</div></div><button class="cf-reset" onclick="resetCF()">Ã¢ÂÂº Reset</button></div>
+  <div class="ph"><div><div class="pt">Custom filter</div><div class="ps">Session only · resets on refresh</div></div><button class="cf-reset" onclick="resetCF()">↺ Reset</button></div>
   <div style="padding:0 22px 14px">
     <div class="cf-row">
       <div><label class="el">Status</label><select class="cf-sel" id="cf-status" onchange="renderCF()"><option value="">All statuses</option><option>New</option><option>Qualifying</option><option>Site visit scheduled</option><option>Site visit done</option><option>Proposal</option><option>Quoted</option><option>Won</option><option>Lost</option></select></div>
@@ -1324,7 +1324,7 @@ function fallbackCopy(text, cb){
     <div class="cf-row">
       <div><label class="el">Division</label><select class="cf-sel" id="cf-div" onchange="renderCF()"><option value="">All divisions</option><option>Div 1</option><option>Div 2</option></select></div>
       <div><label class="el">Industry</label><select class="cf-sel" id="cf-industry" onchange="renderCF()"><option value="">All industries</option><option>General industrial</option><option>F&amp;B / Food tech</option><option>Medical device</option><option>Semiconductor</option></select></div>
-      <div><label class="el">Source</label><select class="cf-sel" id="cf-source" onchange="renderCF()"><option value="">All sources</option><option>WhatsApp</option><option>Email</option><option>Website form</option><option>Phone call</option><option>BNI referral</option><option>Friend referral</option><option>Salesman Ã¢ÂÂ Mr Lee</option></select></div>
+      <div><label class="el">Source</label><select class="cf-sel" id="cf-source" onchange="renderCF()"><option value="">All sources</option><option>WhatsApp</option><option>Email</option><option>Website form</option><option>Phone call</option><option>BNI referral</option><option>Friend referral</option><option>Salesman — Mr Lee</option></select></div>
     </div>
     <div class="cf-row">
       <div><label class="el">Overdue only</label><select class="cf-sel" id="cf-overdue" onchange="renderCF()"><option value="">All</option><option value="yes">Overdue only</option></select></div>
@@ -1338,16 +1338,16 @@ function fallbackCopy(text, cb){
 <!-- Mobile bottom nav -->
 <div class="mob-nav" id="mob-nav">
   <button class="mob-nav-item" onclick="showPage('dashboard');setMobNav(this)">
-    <span class="mob-nav-icon">Ã¢ÂÂ</span>Dash
+    <span class="mob-nav-icon">◈</span>Dash
   </button>
   <button class="mob-nav-item active" onclick="showPage('master');setMobNav(this)">
-    <span class="mob-nav-icon">Ã¢ÂÂ¡</span>List
+    <span class="mob-nav-icon">≡</span>List
   </button>
   <button class="mob-nav-item" onclick="showPage('kanban');setMobNav(this)">
-    <span class="mob-nav-icon">Ã¢ÂÂ</span>Board
+    <span class="mob-nav-icon">⊞</span>Board
   </button>
   <button class="mob-nav-item" onclick="toggleMobMenu()">
-    <span class="mob-nav-icon">Ã¢ÂÂ°</span>More
+    <span class="mob-nav-icon">☰</span>More
   </button>
 </div>
 </body>
