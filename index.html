@@ -862,15 +862,19 @@ async function saveLead(){
   btn.disabled=true;btn.textContent='Saving...';
   setSS('sync','Saving new lead...');
   try{
-    // Upload business card to Drive if photo was taken
-    if(cardDataURL){
+    // Upload business card(s) to Drive
+    if(cardDataURL || cardDataURL2){
       try{
-        var driveLink = await uploadCardToDrive(
-          cardDataURL,
-          lead['Client name'],
-          lead['Contact name']
-        );
-        if(driveLink) lead['Business card'] = driveLink;
+        var links = [];
+        if(cardDataURL){
+          var l1 = await uploadCardToDrive(cardDataURL, lead['Client name'], lead['Contact name'], 1);
+          if(l1) links.push(l1);
+        }
+        if(cardDataURL2){
+          var l2 = await uploadCardToDrive(cardDataURL2, lead['Client name'], lead['Contact name'], 2);
+          if(l2) links.push(l2);
+        }
+        if(links.length) lead['Business card'] = links.join(' | ');
       } catch(e){ console.warn('Drive upload failed:', e); }
     }
     var r=await apiPost('addLead',lead);
@@ -1212,12 +1216,13 @@ async function extractCardData(){
 
 
 // ── GOOGLE DRIVE UPLOAD (via Apps Script) ────────────────
-async function uploadCardToDrive(dataURL, company, contactName){
+async function uploadCardToDrive(dataURL, company, contactName, slot){
   var year = new Date().getFullYear();
   // Format: 2026 - Systems R&A - Elson Siew
   var coy = (company||'Unknown').replace(/[^a-zA-Z0-9\s&]/g,' ').trim();
   var person = (contactName||'Unknown').replace(/[^a-zA-Z0-9\s]/g,' ').trim();
-  var filename = year + ' - ' + coy + ' - ' + person;
+  var suffix = slot ? ' (' + slot + ')' : '';
+  var filename = year + ' - ' + coy + ' - ' + person + suffix;
 
   var base64 = dataURL.split(',')[1];
   var mimeType = dataURL.split(';')[0].split(':')[1];
@@ -1230,11 +1235,72 @@ async function uploadCardToDrive(dataURL, company, contactName){
     folderId: '1cDv64dPA8Yoo_yNrvuWcF0SXISprdACF'
   };
 
-  var encoded = encodeURIComponent(JSON.stringify(payload));
-  var resp = await fetch(API + '?action=uploadCard&data=' + encoded);
+  // Use POST — base64 image is too large for URL params
+  var resp = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
   var result = await resp.json();
   if(result.ok) return result.url;
   throw new Error(result.error || 'Drive upload failed');
+}
+
+
+// ── EXPORT CONTACT (one-click copy) ─────────────────────
+function exportContact(){
+  // Try from open modal first
+  if(document.getElementById('modal')?.classList.contains('open') && curId){
+    var lead = leads.find(function(l){return lv(l,'ID')===String(curId);});
+    if(lead){
+      var parts = [
+        lv(lead,'Client name'),
+        lv(lead,'Site location'),
+        lv(lead,'Contact name') || lv(lead,'Contact person & number').split('·')[0].trim(),
+        lv(lead,'Phone number') || (lv(lead,'Contact person & number').split('·')[1]||'').trim(),
+        lv(lead,'Job title'),
+        lv(lead,'Email')
+      ].filter(Boolean);
+      copyToClipboard(parts.join(', '), 'copied-flash-modal');
+      return;
+    }
+  }
+  // From new lead form
+  var parts = [
+    (document.getElementById('fn')?.value||'').trim(),
+    (document.getElementById('flo')?.value||'').trim(),
+    (document.getElementById('fcn')?.value||'').trim(),
+    (document.getElementById('fph')?.value||'').trim(),
+    (document.getElementById('fjt')?.value||'').trim(),
+    (document.getElementById('fe')?.value||'').trim()
+  ].filter(Boolean);
+  if(!parts.length){ alert('Fill in contact details first.'); return; }
+  copyToClipboard(parts.join(', '), 'copied-flash');
+}
+
+function copyToClipboard(text, flashId){
+  var show = function(){
+    var el = document.getElementById(flashId);
+    if(el){ el.style.display='inline'; setTimeout(function(){el.style.display='none';}, 2000); }
+  };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(show).catch(function(){
+      fallbackCopy(text, show);
+    });
+  } else {
+    fallbackCopy(text, show);
+  }
+}
+
+function fallbackCopy(text, cb){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); if(cb) cb(); } catch(e){}
+  document.body.removeChild(ta);
 }
 
 </script>
