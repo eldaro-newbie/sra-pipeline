@@ -1216,7 +1216,13 @@ async function extractCardData(){
 
 
 // ── GOOGLE DRIVE UPLOAD (via Apps Script) ────────────────
-async function uploadCardToDrive(base64Data, filename, mimeType) {
+async function uploadCardToDrive(dataURL, clientName, contactName, index) {
+    // Pre-strip data URL prefix so Apps Script receives clean base64
+    const base64Data = dataURL.indexOf(',') !== -1 ? dataURL.split(',')[1] : dataURL;
+    const year = new Date().getFullYear();
+    const safe = s => String(s || '').replace(/[\\/:*?"<>|]/g, '').trim() || 'Unknown';
+    const filename = year + ' - ' + safe(clientName) + ' - ' + safe(contactName) + ' (' + index + ').jpg';
+    
     const response = await fetch(API, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1224,7 +1230,7 @@ async function uploadCardToDrive(base64Data, filename, mimeType) {
         action: 'uploadCard',
         base64Data: base64Data,
         filename: filename,
-        mimeType: mimeType || 'image/jpeg'
+        mimeType: 'image/jpeg'
       })
     });
     const result = await response.json();
