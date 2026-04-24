@@ -1173,51 +1173,21 @@ async function extractCardData(){
   btn.disabled = true;
 
   try {
-    // Build parts array — send all uploaded card images to Gemini
-    var parts = [{
-      text: 'You are extracting contact information from business card images. ' +
-            'Look at all provided images carefully (may be front and back of same card). ' +
-            'Return ONLY a raw JSON object (no markdown, no code blocks) with exactly these keys: ' +
-            'company, name, phone, title, email, address. ' +
-            'For phone: prefer mobile number (starts with 011/012/013/016/017/018/019 or +601). ' +
-            'For company: use the main company name (e.g. "Farm Fresh Milk Sdn. Bhd."). ' +
-            'For address: include street, postcode, city. ' +
-            'If a field is not found, use empty string "".'
-    }];
+    // Send images to Apps Script (proxy) — Gemini key stays private server-side
+    var resp = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'extractCard',
+        card1: cardDataURL || null,
+        card2: cardDataURL2 || null
+      })
+    });
 
-    // Add card images
-    function addImage(dataURL){
-      var base64 = dataURL.split(',')[1];
-      var mime = dataURL.split(';')[0].split(':')[1];
-      parts.push({ inline_data: { mime_type: mime, data: base64 } });
-    }
-    if(cardDataURL)  addImage(cardDataURL);
-    if(cardDataURL2) addImage(cardDataURL2);
+    var result = await resp.json();
+    if(!result.ok) throw new Error(result.error || 'Extraction failed');
 
-    var resp = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyCu8M8KZxI_cVxQATzDg0UHVPAxIYoqCtg',
-      { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ contents: [{ parts: parts }] }) }
-    );
-    var data = await resp.json();
-
-    // Handle API errors
-    if(data.error){
-      var m = data.error.message || '';
-      if(data.error.code===429) throw new Error('Quota exceeded — check billing at console.cloud.google.com');
-      if(data.error.code===400) throw new Error('Invalid request — check API key');
-      throw new Error(m.substring(0,80));
-    }
-
-    var text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if(!text) throw new Error('No response from Gemini');
-
-    // Parse JSON — strip any markdown wrapping
-    var clean = text.replace(/```json|```/g,'').trim();
-    var jsonMatch = clean.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error('Could not parse response: ' + text.substring(0,50));
-    var info = JSON.parse(jsonMatch[0]);
-
+    var info = result.data || {};
     console.log('Gemini extracted:', JSON.stringify(info));
 
     // Fill form fields
@@ -1233,7 +1203,7 @@ async function extractCardData(){
     setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 3000);
 
   } catch(e) {
-    console.error('Gemini OCR error:', e.message);
+    console.error('Extract error:', e.message);
     btn.textContent = '✗ ' + (e.message||'Failed').substring(0,50);
     btn.style.background = '#ef4444';
     setTimeout(function(){ btn.textContent='✦ Extract data from card'; btn.style.background=''; btn.disabled=false; }, 4000);
