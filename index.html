@@ -1186,15 +1186,53 @@ async function extractCardData(){
     btn.textContent = '⏳ Reading card...';
 
     // Run OCR on front card (and back if available)
+    // Preprocess image: handle dark backgrounds by trying both normal and inverted
+    function preprocessCard(dataURL){
+      return new Promise(function(resolve){
+        var img = new Image();
+        img.onload = function(){
+          var canvas = document.createElement('canvas');
+          canvas.width = img.width; canvas.height = img.height;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+
+          // Check if image is dark (average brightness < 128)
+          var data = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+          var brightness = 0;
+          for(var i=0;i<data.length;i+=4){
+            brightness += (data[i]*0.299 + data[i+1]*0.587 + data[i+2]*0.114);
+          }
+          brightness = brightness / (data.length/4);
+
+          if(brightness < 128){
+            // Dark background — invert colors for better OCR
+            ctx.globalCompositeOperation = 'difference';
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+          }
+          // Scale up for better OCR accuracy
+          var out = document.createElement('canvas');
+          out.width = canvas.width * 2; out.height = canvas.height * 2;
+          var octx = out.getContext('2d');
+          octx.imageSmoothingEnabled = false;
+          octx.drawImage(canvas, 0, 0, out.width, out.height);
+          resolve(out.toDataURL());
+        };
+        img.src = dataURL;
+      });
+    }
+
     var worker = await Tesseract.createWorker('eng');
     var text1 = '', text2 = '';
 
     if(cardDataURL){
-      var r1 = await worker.recognize(cardDataURL);
+      var img1 = await preprocessCard(cardDataURL);
+      var r1 = await worker.recognize(img1);
       text1 = r1.data.text;
     }
     if(cardDataURL2){
-      var r2 = await worker.recognize(cardDataURL2);
+      var img2 = await preprocessCard(cardDataURL2);
+      var r2 = await worker.recognize(img2);
       text2 = r2.data.text;
     }
     await worker.terminate();
@@ -1205,42 +1243,71 @@ async function extractCardData(){
     // Parse extracted text into fields
     var lines = fullText.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
 
-    // Phone: look for Malaysian phone patterns
-    var phoneMatch = fullText.match(/(?:\+?6?0|0)[1-9][0-9][\s\-]?[0-9]{3}[\s\-]?[0-9]{3,4}/);
-    var phone = phoneMatch ? phoneMatch[0].replace(/\s/g,'') : '';
-
-    // Email
-    var emailMatch = fullText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
-    var email = emailMatch ? emailMatch[0] : '';
-
-    // Company: usually shortest ALL CAPS line or line with Sdn Bhd / Pte Ltd
-    var company = '';
-    var companyMatch = fullText.match(/[A-Za-z0-9\s&.,()]+(?:Sdn\.?\s*Bhd|Pte\.?\s*Ltd|Sdn Bhd|SDN BHD|PLT|LLP)/i);
-    if(companyMatch) company = companyMatch[0].trim();
-
-    // Name: line with Mr/Ms/Dr or longest proper-case line that isn't company/phone/email
-    var name = '';
-    var nameMatch = fullText.match(/(?:Mr\.?|Mrs\.?|Ms\.?|Dr\.?|Encik|Puan|Cik)\s+[A-Za-z\s]+/i);
-    if(nameMatch){ name = nameMatch[0].trim(); }
+    // ── PHONE ──────────────────────────────────────────────
+    // Match +60 international or local 01x mobile
+    var phone = '';
+    var mobileMatch = fullText.match(/\+?60[1][0-9][\-\s]?[0-9]{4}[\-\s]?[0-9]{4}/);
+    if(mobileMatch){ phone = mobileMatch[0].trim(); }
     else {
-      // Try finding a proper case line (First Last format)
+      var localMobile = fullText.match(/0[1][0-9][\-\s]?[0-9]{3,4}[\-\s]?[0-9]{4}/);
+      if(localMobile) phone = localMobile[0].trim();
+      else {
+        // Fallback to any phone pattern
+        var anyPhone = fullText.match(/(?:\+?60|0)[1-9][\-\s]?[0-9]{3,4}[\-\s]?[0-9]{3,4}/);
+        if(anyPhone) phone = anyPhone[0].replace(/^(?:Tel|Fax|Hp)[:\s]*/i,'').trim();
+      }
+    }
+
+    // ── EMAIL ───────────────────────────────────────────────
+    var emailMatch = fullText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+    var email = emailMatch ? emailMatch[0].toLowerCase() : '';
+
+    // ── COMPANY ─────────────────────────────────────────────
+    var company = '';
+    // Look for Sdn Bhd, PLT, LLP, Pte Ltd etc
+    var companyMatch = fullText.match(/[A-Za-z0-9\s&.,()\-]+?(?:SDN\.?\s*BHD\.?|Sdn\.?\s*Bhd\.?|PLT|LLP|Pte\.?\s*Ltd\.?|Berhad)/i);
+    if(companyMatch){
+      // Clean up pipe chars and extra spaces from OCR
+      company = companyMatch[0].replace(/[|]/g,'').replace(/\s+/g,' ').trim();
+    }
+
+    // ── NAME ────────────────────────────────────────────────
+    var name = '';
+    // Look for name with title prefix
+    var nameMatch = fullText.match(/(?:Mr\.?|Mrs\.?|Ms\.?|Dr\.?|Prof\.?|Encik|En\.?|Puan|Pn\.?|Cik|Tn\.?)\s+[A-Za-z][A-Za-z\s]{2,30}/i);
+    if(nameMatch){
+      name = nameMatch[0].replace(/\s+/g,' ').trim();
+    } else {
+      // Find a clean proper-case name line (not company, not address, not phone)
       for(var i=0;i<lines.length;i++){
-        var l = lines[i];
-        if(l.length > 3 && l.length < 40 && /^[A-Z][a-z]/.test(l) && !l.includes('@') && !/[0-9]{4}/.test(l)){
-          if(l !== company){ name = l; break; }
+        var l = lines[i].replace(/[|@:]/g,'').trim();
+        if(l.length >= 4 && l.length <= 35
+          && /^[A-Z][a-zA-Z]/.test(l)
+          && !/[0-9]{3}/.test(l)
+          && !l.match(/(?:Sdn|Bhd|Ltd|Jalan|Taman|No\.|Tel|Fax|www|\.com)/i)
+          && l !== company){
+          name = l; break;
         }
       }
     }
 
-    // Title: look for common job title keywords
+    // ── JOB TITLE ───────────────────────────────────────────
     var title = '';
-    var titleMatch = fullText.match(/(?:Manager|Director|Engineer|Executive|CEO|CFO|COO|Sales|Marketing|Technical|Account|Project|General|Senior|Assistant|Head|Officer|Consultant|Supervisor|Coordinator)[A-Za-z\s,]*/i);
-    if(titleMatch) title = titleMatch[0].trim().split('\n')[0];
+    var titleKw = 'Manager|Director|Engineer|Executive|CEO|CFO|COO|VP|President|Sales|Marketing|Technical|Account|Project|General|Senior|Assistant|Head|Officer|Consultant|Supervisor|Coordinator|Pengarah|Pengurus';
+    var titleMatch = fullText.match(new RegExp('(?:' + titleKw + ')[A-Za-z\\s,&/]{0,40}','i'));
+    if(titleMatch) title = titleMatch[0].trim().split('\n')[0].substring(0,60);
 
-    // Address: look for lines with common address keywords
+    // ── ADDRESS ─────────────────────────────────────────────
     var address = '';
-    var addrMatch = fullText.match(/(?:Jalan|Jln|Lorong|Lot|No\.?|Block|Taman|Bandar|Johor|Selangor|KL|Kuala Lumpur|Penang|Melaka|Perak|Kedah|Pahang|Sabah|Sarawak)[^\n]{5,60}/i);
-    if(addrMatch) address = addrMatch[0].trim();
+    // Look for full address block — Jalan/No/Lot then city
+    var addrKw = 'Jalan|Jln|Lorong|Lot|No\\.|Block|Blok|Taman|Bandar|Johor|Selangor|Kuala Lumpur|KL|Penang|Pulau Pinang|Melaka|Perak|Kedah|Pahang|Sabah|Sarawak|Negeri Sembilan';
+    var addrMatch = fullText.match(new RegExp('(?:' + addrKw + ')[^\\n]{5,80}','i'));
+    if(addrMatch){
+      // Try to get city/state too from next line
+      var addrIdx = fullText.indexOf(addrMatch[0]);
+      var afterAddr = fullText.substring(addrIdx).split('\n').slice(0,3).join(', ');
+      address = afterAddr.replace(/\s+/g,' ').trim().substring(0,100);
+    }
 
     // Fill in the form
     if(company) document.getElementById('fn').value = company;
