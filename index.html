@@ -118,12 +118,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:900px){.metrics{grid-template-columns:repeat(2,1fr)}.two-col,.three-col{grid-template-columns:1fr}.sidebar{width:195px}}
 @media(max-width:640px){.sidebar{display:none}.page{padding:14px}.metrics{grid-template-columns:repeat(2,1fr)}}
-
 .sg{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;padding:14px 16px 4px;user-select:none}
 .sdot2{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:6px}
 .cf-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .cf-sel{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;font-family:var(--font);color:var(--text);outline:none;width:100%}
-.cf-sel:focus{border-color:var(--b2)}
 .cf-reset{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:12px;font-family:var(--font);color:var(--muted);cursor:pointer}
 </style>
 </head>
@@ -172,7 +170,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   </div>
   <div class="sf">Systems R&A (M) Sdn Bhd<br>Johor Bahru · Est. 1985<br>HVAC Design &amp; Build</div>
 </nav>
-
 
 <div class="main">
 <div class="sync-bar">
@@ -291,5 +288,592 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
       <div class="fgp"><label class="flb">Next action date</label><input class="fi" id="fda" type="date"></div>
       <div class="fgp full"><label class="flb">Problem statement / notes</label>
         <textarea class="fta" id="fno" placeholder="What are they cooling? Floor area? Compliance req (GMP/ISO/cleanroom)? Timeline? Budget?"></textarea>
+      </div>
+    </div>
+    <div class="fa">
+      <button class="btn bp" id="save-btn" onclick="saveLead()">Save to Google Sheets</button>
+      <button class="btn" onclick="clearForm()">Clear</button>
+      <span class="toast" id="form-toast">✓ Saved to Google Sheets</span>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+<script>
+
+// ── MOVE FILTER PAGES INTO .main after DOM loads ───────
+document.addEventListener('DOMContentLoaded', function(){
+  var mainEl = document.querySelector('.main');
+  if(!mainEl) return;
+  ['page-st-new','page-st-qualifying','page-st-sitevisit','page-st-proposal',
+   'page-st-quoted','page-st-won','page-st-lost','page-source-view','page-custom-filter'
+  ].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el && el.parentElement!==mainEl) mainEl.appendChild(el);
+  });
+});
+var API='https://script.google.com/macros/s/AKfycbwANieEQdnb1PEP_e3dDOT1xKZ9GHfhA4uCgkB4pkjgsAFDy4OF_KNaadh_zMbMbgVj/exec';
+var leads=[],quotes=[],mf='all',qf='all',curId=null;
+var today=new Date().toISOString().slice(0,10);
+
+// ── API ──────────────────────────────────────────────
+function apiGet(action){
+  return fetch(API+'?action='+action)
+    .then(function(r){return r.json();});
+}
+function apiPost(action,lead){
+  var encoded=encodeURIComponent(JSON.stringify(lead));
+  return fetch(API+'?action='+action+'&data='+encoded)
+    .then(function(r){return r.json();});
+}
+
+// ── HELPERS ───────────────────────────────────────────
+function lv(l,k){return l&&l[k]!==undefined?String(l[k]):''}
+function isActive(l){return['New','Qualifying','Site visit scheduled','Site visit done','Proposal','Quoted'].includes(lv(l,'Status'))}
+function isOD(l){var d=lv(l,'Next action date');return d&&d<today&&isActive(l)}
+function pb(p){var m={Hot:'bh',Warm:'bw',Cold:'bc'};return'<span class="badge '+(m[p]||'bc')+'">'+p+'</span>'}
+function sb(s){var m={'New':'bnew','Qualifying':'bq','Site visit scheduled':'bsi','Site visit done':'bsi','Proposal':'bpr','Quoted':'bqu','Won':'bwon','Lost':'blo','Archived':'bar'};return'<span class="badge '+(m[s]||'bnew')+'">'+s+'</span>'}
+function ab(a){var m={Elson:'be',Daniel:'bd','Mr Lee':'bl2'};return'<span class="badge '+(m[a]||'be')+'">'+a+'</span>'}
+function db(d){return'<span class="badge '+(d==='Div 2'?'bd2':'bd1')+'">'+d+'</span>'}
+function ss(s){var m={'CHW — chilled water system':'CHW','CT — cooling tower':'CT','EAC — evaporative air cooler':'EAC','AHU — air handling unit':'AHU','Cleanroom HVAC':'Cleanroom','Industrial ventilation':'Ventilation','Machine / process cooling':'Process','Trading — chiller':'Chiller','Trading — pump':'Pump','Simple A/C':'Simple A/C','Unknown / TBC':'TBC'};return m[s]||s}
+
+// ── SYNC STATUS ───────────────────────────────────────
+function setSS(st,msg){
+  var dot=document.getElementById('sdot'),el=document.getElementById('sync-status');
+  if(!dot||!el)return;
+  dot.className='sdot';
+  if(st==='ok'){dot.classList.add('ok');el.style.color='var(--won)';}
+  else if(st==='sync'){dot.classList.add('sync','pulse');el.style.color='var(--warm)';}
+  else if(st==='err'){dot.classList.add('err');el.style.color='var(--hot)';}
+  else{el.style.color='var(--muted)';}
+  el.textContent=msg;
+  if(st==='ok'){document.getElementById('sync-time').textContent='Last sync: '+new Date().toLocaleTimeString('en-MY');}
+}
+
+// ── SYNC FROM SHEETS ──────────────────────────────────
+async function syncNow(){
+  setSS('sync','Syncing from Google Sheets...');
+  try{
+    var d=await apiGet('getLeads');
+    if(d.ok&&d.data){
+      leads=d.data;
+      setSS('ok','Synced — '+leads.length+' leads');
+      renderCurrent();
+      buildSourceNav();
+    } else {
+      setSS('err','Sync error: '+(d.error||'Unknown'));
+    }
+  } catch(e){
+    setSS('err','Cannot reach Sheets — '+e.message);
+  }
+}
+
+async function loadQuotes(){
+  try{
+    var d=await apiGet('getQuotes');
+    if(d.ok&&d.data){quotes=d.data;renderQuotes();}
+  } catch(e){console.warn('Quotes failed:',e.message);}
+}
+
+// ── NAVIGATION ────────────────────────────────────────
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});
+  var pg=document.getElementById('page-'+id);
+  if(pg)pg.classList.add('active');
+  document.querySelectorAll('.ni').forEach(function(n){
+    if(n.getAttribute('onclick')==="showPage('"+id+"')")n.classList.add('active');
+  });
+  if(id==='dashboard')renderDash();
+  else if(id==='master')renderMaster();
+  else if(id==='kanban')renderKanban();
+  else if(id==='quotes'){renderQuotes();if(!quotes.length)loadQuotes();}
+  else if(id==='elson')renderTeam('e','Elson');
+  else if(id==='daniel')renderTeam('d','Daniel');
+  else if(id==='lee')renderTeam('l','Mr Lee');
+  else if(typeof STATUS_MAP!=='undefined'&&STATUS_MAP[id])renderStatusView(id);
+  else if(id==='source-view')renderSourceView();
+  else if(id==='custom-filter')renderCF();
+}
+function renderCurrent(){
+  var a=document.querySelector('.page.active');
+  if(a)showPage(a.id.replace('page-',''));
+}
+
+// ── DASHBOARD ─────────────────────────────────────────
+function renderDash(){
+  document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-MY',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var act=leads.filter(isActive),hot=leads.filter(function(l){return lv(l,'Priority')==='Hot'&&isActive(l);});
+  var won=leads.filter(function(l){return lv(l,'Status')==='Won';}),od=leads.filter(isOD);
+  var arc=leads.filter(function(l){return parseInt(lv(l,'Follow-up count')||0)>=2&&isActive(l);});
+  var d2=leads.filter(function(l){return lv(l,'Division')==='Div 2'&&isActive(l);});
+  var tot=leads.filter(function(l){return lv(l,'Status')!=='Archived';});
+  var qn=leads.filter(function(l){return lv(l,'Quotation no.');}).length;
+
+  document.getElementById('dash-metrics').innerHTML=[
+    {l:'Total leads',v:tot.length,c:'vd',s:'All sources'},
+    {l:'Hot leads',v:hot.length,c:'vh',s:'Immediate action'},
+    {l:'Active pipeline',v:act.length,c:'vd',s:'New to Quoted'},
+    {l:'Won',v:won.length,c:'vw',s:'Closed deals'},
+    {l:'Overdue',v:od.length,c:od.length>0?'vh':'vd',s:'Past action date'},
+    {l:'Div 2 active',v:d2.length,c:'vd',s:'Elson-led'},
+    {l:'Flag archive',v:arc.length,c:arc.length>0?'vwarn':'vd',s:'2+ follow-ups'},
+    {l:'Quoted',v:qn,c:'vd',s:'Have quote no.'},
+  ].map(function(m){return '<div class="mc"><div class="ml">'+m.l+'</div><div class="mv '+m.c+'">'+m.v+'</div><div class="ms">'+m.s+'</div></div>';}).join('');
+
+  var stages=['New','Qualifying','Site visit scheduled','Site visit done','Proposal','Quoted'];
+  var fB=['var(--cbg)','var(--d2bg)','var(--wbg)','var(--wbg)','#fdf8ec','var(--gbg)'];
+  var fC=['var(--cold)','var(--d2c)','var(--warm)','var(--warm)','#7a5c10','var(--won)'];
+  var mxF=Math.max.apply(null,stages.map(function(s){return leads.filter(function(l){return lv(l,'Status')===s;}).length;}).concat([1]));
+  document.getElementById('dash-funnel').innerHTML=stages.map(function(s,i){
+    var n=leads.filter(function(l){return lv(l,'Status')===s;}).length;
+    var w=Math.max(Math.round(n/mxF*100),4);
+    return '<div class="fr"><div class="fl">'+s+'</div><div class="ft"><div class="ff" style="width:'+w+'%;background:'+fB[i]+';border-left:3px solid '+fC[i]+'"><span class="fn" style="color:'+fC[i]+'">'+n+'</span></div></div></div>';
+  }).join('');
+
+  var alts=[];
+  leads.forEach(function(l){
+    var fu=parseInt(lv(l,'Follow-up count')||0);
+    if(fu>=2&&isActive(l))alts.push({d:'ard',t:lv(l,'Client name')+' — flag for archive',m:fu+' follow-ups, no reply · '+lv(l,'Assigned to')});
+    else if(isOD(l))alts.push({d:'aam',t:lv(l,'Client name')+' — follow-up overdue',m:'Action: '+lv(l,'Next action date')+' · '+lv(l,'Assigned to')});
+    else if(lv(l,'Priority')==='Hot'&&lv(l,'Status')==='New')alts.push({d:'aam',t:lv(l,'Client name')+' — hot lead not yet contacted',m:'Source: '+lv(l,'Source channel')});
+  });
+  if(!alts.length)alts.push({d:'agr',t:'All leads on track',m:'No overdue follow-ups today'});
+  document.getElementById('dash-alerts').innerHTML=alts.slice(0,6).map(function(a){
+    return '<div class="ai"><div class="ad '+a.d+'"></div><div><div class="at">'+a.t+'</div><div class="am">'+a.m+'</div></div></div>';
+  }).join('');
+
+  var sc={};leads.forEach(function(l){var k=lv(l,'Source channel');sc[k]=(sc[k]||0)+1;});
+  var sm=Math.max.apply(null,Object.values(sc).concat([1]));
+  document.getElementById('dash-source').innerHTML=Object.entries(sc).sort(function(a,b){return b[1]-a[1];}).slice(0,7).map(function(kv){
+    return '<div class="br2"><div class="bl" title="'+kv[0]+'">'+kv[0].replace('Salesman — ','')+'</div><div class="bt"><div class="bf" style="width:'+Math.round(kv[1]/sm*100)+'%;background:var(--cold)"></div></div><div class="bn">'+kv[1]+'</div></div>';
+  }).join('');
+
+  var so={};leads.forEach(function(l){var k=ss(lv(l,'Solution type'));so[k]=(so[k]||0)+1;});
+  var som=Math.max.apply(null,Object.values(so).concat([1]));
+  document.getElementById('dash-solution').innerHTML=Object.entries(so).sort(function(a,b){return b[1]-a[1];}).slice(0,7).map(function(kv){
+    return '<div class="br2"><div class="bl" title="'+kv[0]+'">'+kv[0]+'</div><div class="bt"><div class="bf" style="width:'+Math.round(kv[1]/som*100)+'%;background:var(--d2c)"></div></div><div class="bn">'+kv[1]+'</div></div>';
+  }).join('');
+
+  var tc={Elson:'var(--ec)',Daniel:'var(--dc)','Mr Lee':'var(--lc)'};
+  document.getElementById('dash-team').innerHTML=['Elson','Daniel','Mr Lee'].map(function(t){
+    var m=leads.filter(function(l){return lv(l,'Assigned to')===t;}),am=m.filter(isActive).length,hm=m.filter(function(l){return lv(l,'Priority')==='Hot'&&isActive(l);}).length;
+    var pct=Math.round(m.length/Math.max(leads.length,1)*100);
+    return '<div style="margin-bottom:13px"><div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">'+ab(t)+'<span style="font-size:11px;color:var(--muted);font-family:var(--mono)">'+am+' active · '+hm+' hot</span></div><div class="bt" style="height:7px"><div class="bf" style="width:'+pct+'%;background:'+tc[t]+'"></div></div></div>';
+  }).join('');
+
+  var hl=leads.filter(function(l){return lv(l,'Priority')==='Hot'&&isActive(l);});
+  document.getElementById('dash-hot').innerHTML='<thead><tr><th>Client</th><th>Solution</th><th>Status</th><th>Assigned</th><th>Quote no.</th><th>Notes</th></tr></thead><tbody>'+hl.map(function(l){
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'</td></tr>';
+  }).join('')+'</tbody>';
+}
+
+// ── MASTER LIST ───────────────────────────────────────
+function setMF(f,btn){mf=f;document.querySelectorAll('#mf .fbt').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderMaster();}
+function renderMaster(){
+  var q=(document.getElementById('msearch')?.value||'').toLowerCase();
+  var f=leads.filter(function(l){return lv(l,'Status')!=='Archived';});
+  if(mf==='Hot')f=f.filter(function(l){return lv(l,'Priority')==='Hot';});
+  else if(mf==='Warm')f=f.filter(function(l){return lv(l,'Priority')==='Warm';});
+  else if(mf==='active')f=f.filter(isActive);
+  else if(mf==='Div 2')f=f.filter(function(l){return lv(l,'Division')==='Div 2';});
+  else if(mf==='Won')f=f.filter(function(l){return lv(l,'Status')==='Won';});
+  if(q)f=f.filter(function(l){return(lv(l,'Client name')+lv(l,'Contact person & number')+lv(l,'Problem statement')).toLowerCase().includes(q);});
+  document.getElementById('mbody').innerHTML=f.length?f.map(function(l){
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Source channel')+'</td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+db(lv(l,'Division'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td>'+pb(lv(l,'Priority'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td></tr>';
+  }).join(''):'<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--muted);font-family:var(--mono)">No leads found</td></tr>';
+}
+
+// ── KANBAN ────────────────────────────────────────────
+function renderKanban(){
+  var cols=['New','Qualifying','Site visit scheduled','Site visit done','Proposal','Quoted','Won','Lost'];
+  document.getElementById('kboard').innerHTML=cols.map(function(col){
+    var items=leads.filter(function(l){return lv(l,'Status')===col;});
+    return '<div class="kc"><div class="kh"><span>'+col+'</span><span class="kn">'+items.length+'</span></div>'+items.map(function(l){
+      return '<div class="kcard" onclick="openModal(\''+lv(l,'ID')+'\')"><div class="kname">'+lv(l,'Client name')+'</div><div class="ktags">'+pb(lv(l,'Priority'))+ab(lv(l,'Assigned to'))+'</div><div class="kmeta">'+ss(lv(l,'Solution type'))+' · '+(lv(l,'Industry')||'').split(' ')[0]+'</div></div>';
+    }).join('')+'</div>';
+  }).join('');
+}
+
+// ── QUOTES ────────────────────────────────────────────
+function setQF(f,btn){qf=f;document.querySelectorAll('#page-quotes .fbt').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderQuotes();}
+function renderQuotes(){
+  var q=(document.getElementById('qsearch')?.value||'').toLowerCase();
+  var f=quotes;
+  if(qf==='Elson')f=f.filter(function(x){return x.agent==='Elson';});
+  else if(qf==='Daniel')f=f.filter(function(x){return x.agent==='Daniel';});
+  else if(qf==='Lee')f=f.filter(function(x){return x.agent==='Lee'||x.agent==='Mr Lee';});
+  else if(qf==='Deal')f=f.filter(function(x){return x.status==='Deal';});
+  if(q)f=f.filter(function(x){return(x.quoteNo+x.customer+x.project).toLowerCase().includes(q);});
+  if(!f.length){document.getElementById('qbody').innerHTML='<div style="text-align:center;padding:28px;color:var(--muted);font-family:var(--mono);font-size:12px">'+(quotes.length?'No matches':'Loading quotations...')+'</div>';return;}
+  document.getElementById('qbody').innerHTML=f.map(function(q){
+    return '<div class="qrow"><span style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--d2c)">'+q.quoteNo+'</span><span style="font-weight:500;font-size:13px">'+q.customer+'</span><span style="color:var(--muted);font-size:12px">'+q.project+'</span><span>'+ab(q.agent)+'</span><span style="font-family:var(--mono);font-size:12px;font-weight:600">'+(q.amount?'RM '+Number(q.amount).toLocaleString():'')+'</span><span>'+(q.status?'<span class="badge '+(q.status==='Deal'?'bwon':'bar')+'">'+q.status+'</span>':'')+'</span></div>';
+  }).join('');
+}
+
+// ── TEAM VIEWS ────────────────────────────────────────
+function renderTeam(pid,name){
+  var mine=leads.filter(function(l){return lv(l,'Assigned to')===name&&isActive(l);});
+  var hot=mine.filter(function(l){return lv(l,'Priority')==='Hot';}).length;
+  var od=mine.filter(isOD).length;
+  var tc={Elson:'var(--ec)',Daniel:'var(--dc)','Mr Lee':'var(--lc)'}[name];
+  document.getElementById(pid+'banner').innerHTML=
+    '<div class="tmc"><div class="tml">Active</div><div class="tmv" style="color:'+tc+'">'+mine.length+'</div></div>'+
+    '<div class="tmc"><div class="tml">Hot</div><div class="tmv" style="color:var(--hot)">'+hot+'</div></div>'+
+    '<div class="tmc"><div class="tml">Overdue</div><div class="tmv" style="color:'+(od>0?'var(--hot)':tc)+'">'+od+'</div></div>';
+  document.getElementById(pid+'body').innerHTML=mine.length?mine.map(function(l){
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+pb(lv(l,'Priority'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'</td></tr>';
+  }).join(''):'<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted);font-family:var(--mono)">No active leads</td></tr>';
+}
+
+// ── MODAL — FULL EDIT ─────────────────────────────────
+function sel(id,opts,val){
+  var sid=id.replace(/ /g,'_');
+  return '<select class="ese" id="m_'+sid+'">'+opts.map(function(o){return '<option'+(o===val?' selected':'')+'>'+o+'</option>';}).join('')+'</select>';
+}
+function gv(id){var sid=id.replace(/ /g,'_');var el=document.getElementById('m_'+sid);return el?el.value:'';}
+
+function openModal(id){
+  var l=leads.find(function(x){return lv(x,'ID')===String(id);});
+  if(!l)return;
+  curId=String(id);
+  document.getElementById('mtitle').textContent=lv(l,'Client name');
+  document.getElementById('modalbody').innerHTML=
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">'+pb(lv(l,'Priority'))+sb(lv(l,'Status'))+ab(lv(l,'Assigned to'))+db(lv(l,'Division'))+'</div>'+
+    '<div class="ms2"><div class="mst">Pipeline settings</div><div class="fg2">'+
+      '<div class="eg"><label class="el">Status</label>'+sel('Status',['New','Qualifying','Site visit scheduled','Site visit done','Proposal','Quoted','Won','Lost','Archived'],lv(l,'Status'))+'</div>'+
+      '<div class="eg"><label class="el">Priority</label>'+sel('Priority',['Hot','Warm','Cold'],lv(l,'Priority'))+'</div>'+
+      '<div class="eg"><label class="el">Assigned to</label>'+sel('Assigned to',['Elson','Daniel','Mr Lee'],lv(l,'Assigned to'))+'</div>'+
+      '<div class="eg"><label class="el">Division</label>'+sel('Division',['Div 2','Div 1','TBC'],lv(l,'Division'))+'</div>'+
+      '<div class="eg"><label class="el">Follow-up count</label><input class="ei" id="m_fu" type="number" value="'+(lv(l,'Follow-up count')||0)+'" min="0"></div>'+
+      '<div class="eg"><label class="el">Next action date</label><input class="ei" id="m_actiondate" type="date" value="'+(lv(l,'Next action date')||'')+'"></div>'+
+      '<div class="eg"><label class="el">Quotation no.</label><input class="ei" id="m_quot" placeholder="SRA-QXXX-YYYY-rX" value="'+(lv(l,'Quotation no.')||'')+'"></div>'+
+    '</div></div>'+
+    '<div class="ms2"><div class="mst">Client details</div><div class="fg2">'+
+      '<div class="eg"><label class="el">Client name</label><input class="ei" id="m_name" value="'+lv(l,'Client name')+'"></div>'+
+      '<div class="eg"><label class="el">Contact</label><input class="ei" id="m_contact" value="'+lv(l,'Contact person & number')+'"></div>'+
+      '<div class="eg"><label class="el">Email</label><input class="ei" id="m_email" type="email" value="'+(lv(l,'Email')||'')+'"></div>'+
+      '<div class="eg"><label class="el">Site location</label><input class="ei" id="m_location" value="'+(lv(l,'Site location')||'')+'"></div>'+
+    '</div></div>'+
+    '<div class="ms2"><div class="mst">Enquiry details</div><div class="fg2">'+
+      '<div class="eg"><label class="el">Source</label>'+sel('Source channel',['WhatsApp','Email','Website form','Phone call','BNI referral','Friend referral','Salesman — Daniel','Salesman — Mr Lee','Walk-in'],lv(l,'Source channel'))+'</div>'+
+      '<div class="eg"><label class="el">Industry</label>'+sel('Industry',['Medical device','Semiconductor','F&B / Food tech','General industrial','Pharmaceutical','Other'],lv(l,'Industry'))+'</div>'+
+      '<div class="eg"><label class="el">Solution type</label>'+sel('Solution type',['CHW — chilled water system','CT — cooling tower','EAC — evaporative air cooler','AHU — air handling unit','Cleanroom HVAC','Industrial ventilation','Machine / process cooling','Trading — chiller','Trading — pump','Simple A/C','Unknown / TBC'],lv(l,'Solution type'))+'</div>'+
+      '<div class="eg"><label class="el">Install type</label>'+sel('New or replacement',['New installation','Replacement','Upgrade','Unknown'],lv(l,'New or replacement'))+'</div>'+
+    '</div></div>'+
+    '<div class="ms2"><div class="mst">Notes</div>'+
+      '<div class="eg full"><label class="el">Problem statement</label><textarea class="eta" id="m_notes">'+(lv(l,'Problem statement')||'')+'</textarea></div>'+
+      '<div class="eg full" style="margin-top:9px"><label class="el">Internal notes</label><textarea class="eta" id="m_internal">'+(lv(l,'Internal notes')||'')+'</textarea></div>'+
+    '</div>'+
+    '<div class="mf">'+
+      '<button class="btn bp bsm" onclick="saveEdit()">Save to Sheets</button>'+
+      '<button class="btn bsm" onclick="closeModal()">Cancel</button>'+
+      '<span class="stoa" id="stoa"></span>'+
+    '</div>';
+  // Scroll the edit panel into view
+  var mo=document.getElementById('modal');
+  mo.classList.add('open');
+  document.body.style.overflow='hidden';
+  mo.scrollTop=0;
+}
+
+async function saveEdit(){
+  return saveModal();
+}
+async function saveModal(){
+  if(!curId){setSS('err','No lead selected');return;}
+  var l=leads.find(function(x){return lv(x,'ID')===curId;});
+  if(!l){setSS('err','Lead not found: '+curId);return;}
+
+  // Read all fields from modal
+  l['Status']=gv('Status');
+  l['Priority']=gv('Priority');
+  l['Assigned to']=gv('Assigned to');
+  l['Division']=gv('Division');
+  l['Follow-up count']=document.getElementById('m_fu')?document.getElementById('m_fu').value:'0';
+  l['Next action date']=document.getElementById('m_actiondate')?document.getElementById('m_actiondate').value:'';
+  l['Quotation no.']=document.getElementById('m_quot')?document.getElementById('m_quot').value:'';
+  l['Client name']=document.getElementById('m_name')?document.getElementById('m_name').value:lv(l,'Client name');
+  l['Contact person & number']=document.getElementById('m_contact')?document.getElementById('m_contact').value:'';
+  l['Email']=document.getElementById('m_email')?document.getElementById('m_email').value:'';
+  l['Site location']=document.getElementById('m_location')?document.getElementById('m_location').value:'';
+  l['Source channel']=gv('Source channel');
+  l['Industry']=gv('Industry');
+  l['Solution type']=gv('Solution type');
+  l['New or replacement']=gv('New or replacement');
+  l['Problem statement']=document.getElementById('m_notes')?document.getElementById('m_notes').value:'';
+  l['Internal notes']=document.getElementById('m_internal')?document.getElementById('m_internal').value:'';
+
+  // Show saving animation
+  var btn=document.querySelector('#modalbody .btn.bp');
+  var origTxt=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Updating...';}
+  var stoa=document.getElementById('stoa');
+  if(stoa){stoa.textContent='';stoa.style.display='none';}
+  setSS('sync','Saving to Google Sheets...');
+  try{
+    var r=await apiPost('updateLead',l);
+    if(r.ok){
+      setSS('ok','Saved — '+lv(l,'Client name'));
+      if(btn){btn.textContent='✓ Updated';btn.style.background='var(--won)';}
+      if(stoa){stoa.textContent='✓ Saved to Sheets';stoa.style.display='inline';}
+      setTimeout(function(){
+        closeModal();
+        renderCurrent();
+      },1000);
+    } else {
+      setSS('err','Save failed: '+(r.error||'Unknown'));
+      if(btn){btn.disabled=false;btn.textContent=origTxt;btn.style.background='';}
+    }
+  } catch(e){
+    setSS('err','Save failed: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent=origTxt;btn.style.background='';}
+  }
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';curId=null;}
+function closeMO(e){if(e.target===document.getElementById('modal'))closeModal();}
+
+// ── NEW LEAD ──────────────────────────────────────────
+async function saveLead(){
+  var name=document.getElementById('fn').value.trim();
+  if(!name){alert('Please enter a client name.');return;}
+  var lead={
+    'ID':String(Date.now()),
+    'Client name':name,
+    'Contact person & number':document.getElementById('fc').value,
+    'Email':document.getElementById('fe').value,
+    'Source channel':document.getElementById('fso').value,
+    'Date logged':today,
+    'Industry':document.getElementById('fi2').value,
+    'Solution type':document.getElementById('fsl').value,
+    'Division':document.getElementById('fdv').value,
+    'Assigned to':document.getElementById('fas').value,
+    'Priority':document.getElementById('fpr').value,
+    'Status':'New',
+    'Site location':document.getElementById('flo').value,
+    'New or replacement':document.getElementById('fin').value,
+    'Problem statement':document.getElementById('fno').value,
+    'Next action date':document.getElementById('fda').value,
+    'Follow-up count':'0',
+    'Quotation no.':'',
+    'Internal notes':''
+  };
+  var btn=document.getElementById('save-btn');
+  btn.disabled=true;btn.textContent='Saving...';
+  setSS('sync','Saving new lead...');
+  try{
+    var r=await apiPost('addLead',lead);
+    if(r.ok){
+      if(r.data)leads.unshift(r.data);
+      else leads.unshift(lead);
+      setSS('ok','Saved — '+name);
+      clearForm();
+      var t=document.getElementById('form-toast');
+      if(t){t.style.display='inline';setTimeout(function(){t.style.display='none';},3000);}
+    } else {
+      setSS('err','Save failed: '+(r.error||'Unknown'));
+    }
+  } catch(e){
+    setSS('err','Save failed: '+e.message);
+  }
+  btn.disabled=false;btn.textContent='Save to Google Sheets';
+}
+
+function clearForm(){
+  ['fn','fc','fe','flo','fno','fda'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+}
+
+// ── INIT ──────────────────────────────────────────────
+async function init(){
+  await syncNow();
+  setInterval(syncNow,5*60*1000);
+}
+init();
+
+
+// ── FILTER PAGES: move into .main after DOM loads ──────
+document.addEventListener('DOMContentLoaded', function(){
+  var mainEl = document.querySelector('.main');
+  if(!mainEl) return;
+  var ids = ['page-st-new','page-st-qualifying','page-st-sitevisit','page-st-proposal',
+             'page-st-quoted','page-st-won','page-st-lost','page-source-view','page-custom-filter'];
+  ids.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el && el.parentElement !== mainEl) mainEl.appendChild(el);
+  });
+});
+
+// ── STATUS VIEWS ────────────────────────────────────────
+var STATUS_MAP = {
+  'st-new':        {statuses:['New'],                                  bid:'sb-new'},
+  'st-qualifying': {statuses:['Qualifying'],                           bid:'sb-qualifying'},
+  'st-sitevisit':  {statuses:['Site visit scheduled','Site visit done'],bid:'sb-sitevisit'},
+  'st-proposal':   {statuses:['Proposal'],                             bid:'sb-proposal'},
+  'st-quoted':     {statuses:['Quoted'],                               bid:'sb-quoted'},
+  'st-won':        {statuses:['Won'],                                  bid:'sb-won'},
+  'st-lost':       {statuses:['Lost'],                                 bid:'sb-lost'},
+};
+function renderStatusView(id){
+  var cfg=STATUS_MAP[id]; if(!cfg)return;
+  var f=leads.filter(function(l){return cfg.statuses.indexOf(lv(l,'Status'))>=0;});
+  var body=document.getElementById(cfg.bid); if(!body)return;
+  if(!f.length){body.innerHTML='<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--muted);font-size:12px">No leads</td></tr>';return;}
+  body.innerHTML=f.map(function(l){
+    var isWonQuoted=(id==='st-won'||id==='st-quoted');
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')">'+
+      '<td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+
+      '</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+lv(l,'Source channel')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td>'+
+      '<td>'+db(lv(l,'Division'))+'</td>'+
+      '<td>'+ab(lv(l,'Assigned to'))+'</td>'+
+      '<td>'+pb(lv(l,'Priority'))+'</td>'+
+      (isWonQuoted
+        ?'<td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td>'
+         +'<td style="font-size:12px;font-family:var(--mono);color:var(--won)">'+(lv(l,'Quote value')?'RM '+parseFloat(lv(l,'Quote value')).toLocaleString():'—')+'</td>'
+        :'<td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td>'
+         +'<td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td>')+
+      '</tr>';
+  }).join('');
+}
+
+// ── SOURCE NAV + VIEW ────────────────────────────────────
+var curSource='';
+function buildSourceNav(){
+  var nav=document.getElementById('source-nav'); if(!nav)return;
+  var sources={};
+  leads.forEach(function(l){var s=lv(l,'Source channel');if(s)sources[s]=(sources[s]||0)+1;});
+  nav.innerHTML=Object.keys(sources).sort().map(function(s){
+    return '<button class="ni" data-src="'+s.replace(/"/g,'&quot;')+'" onclick="showSource(this)">'
+      +'<span style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-right:6px">'+sources[s]+'</span>'+s+'</button>';
+  }).join('');
+}
+function showSource(btn){
+  curSource=btn.dataset.src;
+  document.querySelectorAll('#source-nav .ni').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('src-page-title').textContent='Source: '+curSource;
+  var n=leads.filter(function(l){return lv(l,'Source channel')===curSource;}).length;
+  document.getElementById('src-page-sub').textContent=n+' lead'+(n!==1?'s':'');
+  showPage('source-view');
+  renderSourceView();
+}
+function renderSourceView(){
+  var body=document.getElementById('sb-source'); if(!body)return;
+  var f=leads.filter(function(l){return lv(l,'Source channel')===curSource;});
+  if(!f.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted);font-size:12px">No leads</td></tr>';return;}
+  body.innerHTML=f.map(function(l){
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')">'+
+      '<td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+
+      '</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td>'+
+      '<td>'+db(lv(l,'Division'))+'</td>'+
+      '<td>'+ab(lv(l,'Assigned to'))+'</td>'+
+      '<td>'+pb(lv(l,'Priority'))+'</td>'+
+      '<td>'+sb(lv(l,'Status'))+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td>'+
+      '</tr>';
+  }).join('');
+}
+
+// ── CUSTOM FILTER ────────────────────────────────────────
+function renderCF(){
+  var status  =(document.getElementById('cf-status')  ||{}).value||'';
+  var priority=(document.getElementById('cf-priority') ||{}).value||'';
+  var assigned=(document.getElementById('cf-assigned') ||{}).value||'';
+  var div     =(document.getElementById('cf-div')      ||{}).value||'';
+  var industry=(document.getElementById('cf-industry') ||{}).value||'';
+  var source  =(document.getElementById('cf-source')   ||{}).value||'';
+  var overdue =(document.getElementById('cf-overdue')  ||{}).value||'';
+  var search  =((document.getElementById('cf-search')  ||{}).value||'').toLowerCase();
+  var f=leads.filter(function(l){
+    if(lv(l,'Status')==='Archived')return false;
+    if(status    && lv(l,'Status')        !==status)   return false;
+    if(priority  && lv(l,'Priority')      !==priority) return false;
+    if(assigned  && lv(l,'Assigned to')   !==assigned) return false;
+    if(div       && lv(l,'Division')      !==div)      return false;
+    if(industry  && lv(l,'Industry')      !==industry) return false;
+    if(source    && lv(l,'Source channel')!==source)   return false;
+    if(overdue==='yes'&&!isOD(l))return false;
+    if(search&&!(lv(l,'Client name')+lv(l,'Contact person & number')+lv(l,'Problem statement')+lv(l,'Industry')+lv(l,'Source channel')).toLowerCase().includes(search))return false;
+    return true;
+  });
+  var cnt=document.getElementById('cf-count');
+  if(cnt)cnt.textContent=f.length+' result'+(f.length!==1?'s':'');
+  var body=document.getElementById('cf-body'); if(!body)return;
+  if(!f.length){body.innerHTML='<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--muted);font-size:12px">No leads match your filters</td></tr>';return;}
+  body.innerHTML=f.map(function(l){
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')">'+
+      '<td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+
+      '</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+lv(l,'Source channel')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td>'+
+      '<td>'+db(lv(l,'Division'))+'</td>'+
+      '<td>'+ab(lv(l,'Assigned to'))+'</td>'+
+      '<td>'+pb(lv(l,'Priority'))+'</td>'+
+      '<td>'+sb(lv(l,'Status'))+'</td>'+
+      '<td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td>'+
+      '<td style="font-size:12px;text-align:center">'+(lv(l,'Follow-up count')||0)+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td>'+
+      '</tr>';
+  }).join('');
+}
+function resetCF(){
+  ['cf-status','cf-priority','cf-assigned','cf-div','cf-industry','cf-source','cf-overdue'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  var s=document.getElementById('cf-search');if(s)s.value='';
+  renderCF();
+}
+
+</script>
+
+<!-- GLOBAL EDIT MODAL -->
+<div class="mo" id="modal" onclick="closeMO(event)">
+  <div class="modal">
+    <div class="mh">
+      <div class="mtitle" id="mtitle"></div>
+      <button class="mclose" onclick="closeModal()">×</button>
+    </div>
+    <div class="mb" id="modalbody"></div>
+  </div>
+</div>
+
+<!-- STATUS PAGES -->
+<div class="page" id="page-st-new"><div class="ph"><div><div class="pt">Status: New</div><div class="ps">All new leads</div></div></div><div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>F/U</th><th>Next action</th></tr></thead><tbody id="sb-new"></tbody></table></div></div></div>
+<div class="page" id="page-st-qualifying"><div class="ph"><div><div class="pt">Status: Qualifying</div><div class="ps">Leads being qualified</div></div></div><div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>F/U</th><th>Next action</th></tr></thead><tbody id="sb-qualifying"></tbody></table></div></div></div>
+<div class="page" id="page-st-sitevisit"><div class="ph"><div><div class="pt">Status: Site visit</div><div class="ps">Site visit scheduled or done</div></div></div><div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>F/U</th><th>Next action</th></tr></thead><tbody id="sb-sitevisit"></tbody></table></div></div></div>
+<div class="page" id="page-st-proposal"><div class="ph"><div><div class="pt">Status: Proposal</div><div class="ps">Proposals sent</div></div></div><div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>F/U</th><th>Next action</th></tr></thead><tbody id="sb-proposal"></tbody></table></div></div></div>
+<div class="page" id="page-st-quoted"><div class="ph"><div><div class="pt">Status: Quoted</div><div class="ps">Quotes submitted</div></div></div><div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Quote no.</th><th>Quote value</th></tr></thead><tbody id="sb-quoted"></tbody></table></div></div></div>
+<div class="page" id="page-st-won"><div class="ph"><div><div class="pt">Status: Won</div><div class="ps">Closed won deals</div></div></div><div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Quote no.</th><th>Quote value</th></tr></thead><tbody id="sb-won"></tbody></table></div></div></div>
+<div class="page" id="page-st-lost"><div class="ph"><div><div class="pt">Status: Lost</div><div class="ps">Lost leads</div></div></div><div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Notes</th></tr></thead><tbody id="sb-lost"></tbody></table></div></div></div>
+<!-- SOURCE PAGE -->
+<div class="page" id="page-source-view"><div class="ph"><div><div class="pt" id="src-page-title">By Source</div><div class="ps" id="src-page-sub"></div></div></div><div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Status</th><th>Next action</th></tr></thead><tbody id="sb-source"></tbody></table></div></div></div>
+<!-- CUSTOM FILTER PAGE -->
+<div class="page" id="page-custom-filter">
+  <div class="ph"><div><div class="pt">Custom filter</div><div class="ps">Session only · resets on refresh</div></div><button class="cf-reset" onclick="resetCF()">↺ Reset</button></div>
+  <div style="padding:0 22px 14px">
+    <div class="cf-row">
+      <div><label class="el">Status</label><select class="cf-sel" id="cf-status" onchange="renderCF()"><option value="">All statuses</option><option>New</option><option>Qualifying</option><option>Site visit scheduled</option><option>Site visit done</option><option>Proposal</option><option>Quoted</option><option>Won</option><option>Lost</option></select></div>
+      <div><label class="el">Priority</label><select class="cf-sel" id="cf-priority" onchange="renderCF()"><option value="">All priorities</option><option>Hot</option><option>Warm</option><option>Cold</option></select></div>
+      <div><label class="el">Assigned to</label><select class="cf-sel" id="cf-assigned" onchange="renderCF()"><option value="">Everyone</option><option>Elson</option><option>Daniel</option><option>Mr Lee</option></select></div>
+    </div>
+    <div class="cf-row">
+      <div><label class="el">Division</label><select class="cf-sel" id="cf-div" onchange="renderCF()"><option value="">All divisions</option><option>Div 1</option><option>Div 2</option></select></div>
+      <div><label class="el">Industry</label><select class="cf-sel" id="cf-industry" onchange="renderCF()"><option value="">All industries</option><option>General industrial</option><option>F&amp;B / Food tech</option><option>Medical device</option><option>Semiconductor</option></select></div>
+      <div><label class="el">Source</label><select class="cf-sel" id="cf-source" onchange="renderCF()"><option value="">All sources</option><option>WhatsApp</option><option>Email</option><option>Website form</option><option>Phone call</option><option>BNI referral</option><option>Friend referral</option><option>Salesman — Mr Lee</option></select></div>
+    </div>
+    <div class="cf-row">
+      <div><label class="el">Overdue only</label><select class="cf-sel" id="cf-overdue" onchange="renderCF()"><option value="">All</option><option value="yes">Overdue only</option></select></div>
+      <div><label class="el">Search</label><input class="cf-sel" id="cf-search" placeholder="Client, notes, contact..." oninput="renderCF()" style="height:32px;box-sizing:border-box"></div>
+      <div style="display:flex;align-items:flex-end"><span id="cf-count" style="font-size:12px;color:var(--muted);font-family:var(--mono)"></span></div>
+    </div>
+  </div>
+  <div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Status</th><th>Quote no.</th><th>F/U</th><th>Next action</th></tr></thead><tbody id="cf-body"></tbody></table></div></div>
+</div>
 </body>
 </html>
