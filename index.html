@@ -215,16 +215,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .fsec-title::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* Business card upload area */
-.card-upload-area{border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all .2s;background:var(--s2);margin-bottom:10px;position:relative}
+.card-slots{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media(max-width:640px){.card-slots{grid-template-columns:1fr}}
+.card-slot-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:var(--mono)}
+.card-upload-area{border:2px dashed var(--border);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--s2);position:relative}
 .card-upload-area:hover,.card-upload-area.drag-over{border-color:var(--b2);background:var(--bg)}
-.card-upload-icon{font-size:28px;margin-bottom:6px}
-.card-upload-label{font-size:12px;color:var(--muted);line-height:1.5}
+.card-upload-icon{font-size:22px;margin-bottom:4px}
+.card-upload-label{font-size:11px;color:var(--muted);line-height:1.4}
 .card-upload-label strong{color:var(--text);display:block;margin-bottom:2px}
-.card-preview{display:none;position:relative;margin-bottom:10px}
-.card-preview img{width:100%;border-radius:8px;border:1px solid var(--border);max-height:200px;object-fit:contain;background:#f5f5f5}
-.card-preview-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1}
+.card-preview{display:none;position:relative;margin-bottom:0}
+.card-preview img{width:100%;border-radius:8px;border:1px solid var(--border);max-height:160px;object-fit:contain;background:#f5f5f5}
+.card-preview-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;line-height:1}
 .card-hidden-input{display:none}
-.card-ocr-btn{width:100%;padding:8px;background:var(--b2);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:none;margin-top:6px}
+.card-ocr-btn{width:100%;padding:8px;background:var(--b2);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:none;margin-top:8px}
 .card-ocr-btn:hover{opacity:.9}
 
 /* Export contact button */
@@ -379,22 +382,48 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
     <div class="fsec">
       <div class="fsec-title">Contact information</div>
 
-      <!-- Business card upload -->
-      <input type="file" id="card-input" class="card-hidden-input" accept="image/*" capture="environment">
-      <div class="card-upload-area" id="card-upload-area"
-           onclick="document.getElementById('card-input').click()"
-           ondragover="event.preventDefault();this.classList.add('drag-over')"
-           ondragleave="this.classList.remove('drag-over')"
-           ondrop="handleCardDrop(event)">
-        <div class="card-upload-icon">📇</div>
-        <div class="card-upload-label">
-          <strong>Paste or drag a business card photo</strong>
-          Click to upload · Take photo on mobile
+      <!-- Business card upload — Front & Back -->
+      <input type="file" id="card-input-1" class="card-hidden-input" accept="image/*">
+      <input type="file" id="card-input-2" class="card-hidden-input" accept="image/*">
+      <div class="card-slots">
+        <!-- Front -->
+        <div>
+          <div class="card-slot-label">Front of card</div>
+          <div class="card-upload-area" id="card-area-1"
+               onclick="document.getElementById('card-input-1').click()"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="handleCardDrop(event,1)">
+            <div class="card-upload-icon">📇</div>
+            <div class="card-upload-label">
+              <strong>Front / Full card</strong>
+              Click · Drag · Paste
+            </div>
+          </div>
+          <div class="card-preview" id="card-preview-1">
+            <img id="card-img-1" src="" alt="Card front">
+            <button class="card-preview-remove" onclick="removeCard(1)" title="Remove">×</button>
+          </div>
         </div>
-      </div>
-      <div class="card-preview" id="card-preview">
-        <img id="card-preview-img" src="" alt="Business card">
-        <button class="card-preview-remove" onclick="removeCard()" title="Remove">×</button>
+        <!-- Back -->
+        <div>
+          <div class="card-slot-label">Back of card <span style="font-weight:400;opacity:.6">(optional)</span></div>
+          <div class="card-upload-area" id="card-area-2"
+               onclick="document.getElementById('card-input-2').click()"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="handleCardDrop(event,2)">
+            <div class="card-upload-icon">🔄</div>
+            <div class="card-upload-label">
+              <strong>Back of card</strong>
+              Click · Drag · Paste
+            </div>
+          </div>
+          <div class="card-preview" id="card-preview-2">
+            <img id="card-img-2" src="" alt="Card back">
+            <button class="card-preview-remove" onclick="removeCard(2)" title="Remove">×</button>
+          </div>
+        </div>
       </div>
       <button class="card-ocr-btn" id="card-ocr-btn" onclick="extractCardData()">
         ✦ Extract data from card
@@ -863,7 +892,7 @@ async function saveLead(){
 
 function clearForm(){
   ['fn','fcn','fph','fjt','fe','flo','fda','fno'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-  removeCard();
+  removeCard(1); removeCard(2);
   ['fso','fi2','fsl','fdv','fas','fpr','fin'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
   var btn=document.getElementById('save-btn');if(btn){btn.disabled=false;btn.textContent='Save to Google Sheets';}
 }
@@ -1067,21 +1096,30 @@ function addTableLabels(){
 })();
 
 
-// ── BUSINESS CARD UPLOAD ────────────────────────────────
-var cardDataURL = null;
+// ── BUSINESS CARD UPLOAD (dual: front + back) ──────────
+var cardDataURL  = null;  // front (slot 1)
+var cardDataURL2 = null;  // back  (slot 2)
+// Track which slot paste goes to (last clicked)
+var lastCardSlot = 1;
 
 document.addEventListener('DOMContentLoaded', function(){
-  var inp = document.getElementById('card-input');
-  if(inp) inp.addEventListener('change', function(){
-    if(this.files && this.files[0]) loadCardFile(this.files[0]);
+  // File input listeners
+  [1,2].forEach(function(slot){
+    var inp = document.getElementById('card-input-'+slot);
+    if(inp) inp.addEventListener('change', function(){
+      if(this.files && this.files[0]) loadCardFile(this.files[0], slot);
+    });
+    var area = document.getElementById('card-area-'+slot);
+    if(area) area.addEventListener('click', function(){ lastCardSlot = slot; });
   });
-  // Paste support (Ctrl+V anywhere on the form page)
+
+  // Paste support — goes to last-clicked slot
   document.addEventListener('paste', function(e){
     if(document.querySelector('#page-new.active')){
-      var items = e.clipboardData?.items || [];
+      var items = (e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {}).items || [];
       for(var i=0;i<items.length;i++){
         if(items[i].type.startsWith('image/')){
-          loadCardFile(items[i].getAsFile());
+          loadCardFile(items[i].getAsFile(), lastCardSlot);
           break;
         }
       }
@@ -1089,33 +1127,41 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
-function handleCardDrop(e){
+function handleCardDrop(e, slot){
   e.preventDefault();
-  document.getElementById('card-upload-area').classList.remove('drag-over');
+  var area = document.getElementById('card-area-'+slot);
+  if(area) area.classList.remove('drag-over');
   var file = e.dataTransfer.files[0];
-  if(file && file.type.startsWith('image/')) loadCardFile(file);
+  if(file && file.type.startsWith('image/')) loadCardFile(file, slot);
 }
 
-function loadCardFile(file){
+function loadCardFile(file, slot){
   var reader = new FileReader();
-  reader.onload = function(e){
-    cardDataURL = e.target.result;
-    document.getElementById('card-preview-img').src = cardDataURL;
-    document.getElementById('card-preview').style.display = 'block';
-    document.getElementById('card-upload-area').style.display = 'none';
-    document.getElementById('card-ocr-btn').style.display = 'block';
+  reader.onload = function(ev){
+    var dataURL = ev.target.result;
+    if(slot===1) cardDataURL  = dataURL;
+    else         cardDataURL2 = dataURL;
+    document.getElementById('card-img-'+slot).src = dataURL;
+    document.getElementById('card-preview-'+slot).style.display = 'block';
+    document.getElementById('card-area-'+slot).style.display = 'none';
+    // Show extract button if at least one card loaded
+    if(cardDataURL || cardDataURL2)
+      document.getElementById('card-ocr-btn').style.display = 'block';
   };
   reader.readAsDataURL(file);
 }
 
-function removeCard(){
-  cardDataURL = null;
-  document.getElementById('card-preview').style.display = 'none';
-  document.getElementById('card-upload-area').style.display = 'block';
-  document.getElementById('card-ocr-btn').style.display = 'none';
-  document.getElementById('card-preview-img').src = '';
-  var inp = document.getElementById('card-input');
+function removeCard(slot){
+  if(slot===1) cardDataURL  = null;
+  else         cardDataURL2 = null;
+  document.getElementById('card-preview-'+slot).style.display = 'none';
+  document.getElementById('card-area-'+slot).style.display = 'block';
+  document.getElementById('card-img-'+slot).src = '';
+  var inp = document.getElementById('card-input-'+slot);
   if(inp) inp.value = '';
+  // Hide extract button only if both slots empty
+  if(!cardDataURL && !cardDataURL2)
+    document.getElementById('card-ocr-btn').style.display = 'none';
 }
 
 // ── GEMINI OCR ───────────────────────────────────────────
@@ -1132,17 +1178,21 @@ async function extractCardData(){
     var base64 = cardDataURL.split(',')[1];
     var mimeType = cardDataURL.split(';')[0].split(':')[1];
 
-    var body = {
-      contents: [{
-        parts: [
-          { text: 'Extract contact information from this business card. Return ONLY a JSON object with these exact keys: company, name, phone, title, email, address. If a field is not found, use empty string. No markdown, no explanation, just the JSON.' },
-          { inline_data: { mime_type: mimeType, data: base64 } }
-        ]
-      }]
-    };
+    // Build parts — include both front and back if available
+    var parts = [
+      { text: 'Extract contact information from this business card (may have front and back images). Return ONLY a valid JSON object with these exact keys: company, name, phone, title, email, address. Combine info from both sides. If a field is not found use empty string. No markdown, no code blocks, just raw JSON.' },
+      { inline_data: { mime_type: mimeType, data: base64 } }
+    ];
+    // Add back of card if provided
+    if(cardDataURL2){
+      var base64b = cardDataURL2.split(',')[1];
+      var mimeB   = cardDataURL2.split(';')[0].split(':')[1];
+      parts.push({ inline_data: { mime_type: mimeB, data: base64b } });
+    }
+    var body = { contents: [{ parts: parts }] };
 
     var resp = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_KEY,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY,
       { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }
     );
     var data = await resp.json();
