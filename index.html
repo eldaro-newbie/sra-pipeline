@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Systems R&A — Lead Pipeline</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;
+  var _tb=tbl.querySelector('tbody');_tb.onclick=function(e){var b=e.target.closest('.del-float');if(!b)return;e.stopPropagation();softDeleteLead(b.dataset.id,b.dataset.nm);};500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f7f6f3;--white:#fff;--s2:#f2f1ee;--border:#e8e6e1;--b2:#d4d2cc;--text:#1a1916;--muted:#7a786f;--m2:#b0aea6;--accent:#1a1916;--a2:#3d3b35;--hot:#c94040;--hbg:#fdf0f0;--hb:#f0c4c4;--warm:#b87020;--wbg:#fdf6ec;--wb:#f0d8a8;--cold:#2060a8;--cbg:#f0f4fd;--cb:#bcd0f0;--won:#1f7a45;--gbg:#f0faf4;--gb:#a8dfc0;--d2c:#6040b0;--d2bg:#f5f0fd;--d2b:#d0b8f4;--d1c:#2060a8;--ec:#6040b0;--ebg:#f5f0fd;--eb:#d0b8f4;--dc:#2060a8;--dbg:#f0f4fd;--db:#bcd0f0;--lc:#1f7a45;--lbg:#f0faf4;--lb:#a8dfc0;--sh:0 1px 3px rgba(0,0,0,.06);--shm:0 4px 12px rgba(0,0,0,.08);--r:8px;--rl:12px;--font:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -737,7 +738,7 @@ function renderMaster(){
   else if(mf==='Won')f=f.filter(function(l){return lv(l,'Status')==='Won';});
   if(q)f=f.filter(function(l){return(lv(l,'Client name')+lv(l,'Contact person & number')+lv(l,'Problem statement')).toLowerCase().includes(q);});
   document.getElementById('mbody').innerHTML=f.length?f.map(function(l){
-    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Source channel')+'</td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+db(lv(l,'Division'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td>'+pb(lv(l,'Priority'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td></tr>';
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td style="position:relative"><button class="del-float" data-id="'+lv(l,'ID')+'" data-nm="'+lv(l,'Client name').replace(/"/g,'&quot;')+'">&#128465; Delete</button><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Source channel')+'</td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+db(lv(l,'Division'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td>'+pb(lv(l,'Priority'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td></tr>';
   }).join(''):'<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--muted);font-family:var(--mono)">No leads found</td></tr>';
 }
 
