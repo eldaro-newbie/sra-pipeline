@@ -245,10 +245,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   .del-btn{color:#ddd;cursor:pointer;font-size:14px;text-align:center;width:34px}
   .del-btn:hover{color:#e53e3e!important}
   
-  .del-btn{position:sticky;right:0;background:#fff;border-left:1px solid #f0f0f0;cursor:pointer;white-space:nowrap;font-size:12px;font-weight:500;color:#dc2626;padding:0 12px}
-  .del-btn:hover{background:#fff5f5}
-  .del-btn-inner{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid #fca5a5;border-radius:5px;background:#fff0f0;transition:background .15s}
-  .del-btn:hover .del-btn-inner{background:#fee2e2}
+  .del-float{display:none;position:absolute;top:50%;right:6px;transform:translateY(-50%);background:#fff0f0;border:1px solid #fca5a5;color:#dc2626;border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;z-index:5;gap:3px;align-items:center}
+  tr:hover .del-float{display:inline-flex}
+  .del-float:hover{background:#fee2e2}
   </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#ffffff">
@@ -663,7 +662,7 @@ function renderDash(){
 
   var hl=leads.filter(function(l){return lv(l,'Priority')==='Hot'&&isActive(l);});
   document.getElementById('dash-hot').innerHTML='<thead><tr><th>Client</th><th>Solution</th><th>Status</th><th>Assigned</th><th>Quote no.</th><th>Notes</th></tr></thead><tbody>'+hl.map(function(l){
-    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'<td class="del-btn" data-id="'+lv(l,'ID')+'" data-nm="'+lv(l,'Client name').replace(/"/g,'&quot;')+'" title="Recycle" style="width:34px;text-align:center;cursor:pointer;color:#ccc;font-size:14px"><div class="del-btn-inner">&#128465; Delete</div></td></tr>';
+    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td style="position:relative"><div class="del-float" onclick="event.stopPropagation();softDeleteLead('"  +lv(l,'ID')+  "','"  +lv(l,'Client name').replace(/"/g,'&quot;')+  "')">&#128465; Delete</div><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+lv(l,'Problem statement')+'<td class="del-btn" data-id="'+lv(l,'ID')+'" data-nm="'+lv(l,'Client name').replace(/"/g,'&quot;')+'" title="Recycle" style="width:34px;text-align:center;cursor:pointer;color:#ccc;font-size:14px"><div class="del-btn-inner">&#128465; Delete</div></td></tr>';
   }).join('')+'</tbody>';
 }
 
