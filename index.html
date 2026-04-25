@@ -1428,17 +1428,19 @@ function fallbackCopy(text, cb){
     var idx = leads.findIndex(function(x){ return lv(x,'ID') === String(id); });
     if (idx === -1) return;
     var removed = leads.splice(idx, 1)[0];
+    renderRecycle(); // optimistic — remove immediately from UI
     apiGet('deleteLead&data=' + encodeURIComponent(id)).then(function(r){
       if (r && r.ok) {
-        renderRecycle();
         toast('Permanently deleted');
       } else {
-        leads.splice(idx, 0, removed);
+        // rollback
+        leads.push(removed);
         renderRecycle();
-        toast('Delete failed — Apps Script not updated yet');
+        toast('Delete failed: ' + (r && r.error ? r.error : 'Unknown error'));
       }
-    }).catch(function(){
-      leads.splice(idx, 0, removed);
+    }).catch(function(e){
+      // rollback
+      leads.push(removed);
       renderRecycle();
       toast('Delete failed — check connection');
     });
