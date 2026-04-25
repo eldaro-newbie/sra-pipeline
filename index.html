@@ -219,7 +219,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 @media(max-width:640px){.card-slots{grid-template-columns:1fr}}
 .card-slot-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:var(--mono)}
 .card-upload-area{border:2px dashed var(--border);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--s2);position:relative}
-.card-upload-area:hover,.card-upload-area.drag-over{border-color:var(--b2);background:var(--bg)}
+.card-upload-area:hover,.card-upload-area.drag-over{border-color:var(--b2);background:var(--bg)}.td-trash{width:32px;min-width:32px;padding:0 !important;text-align:center;vertical-align:middle}.btn-trash{background:none;border:none;cursor:pointer;font-size:15px;padding:4px 6px;border-radius:6px;color:var(--muted);line-height:1;display:inline-flex;align-items:center;justify-content:center}.btn-trash:hover,.btn-trash:active{background:rgba(239,68,68,.12);color:#ef4444}.rb-row{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)}.rb-row:last-child{border-bottom:none}.rb-info{flex:1;min-width:0}.rb-name{font-size:14px;font-weight:600;color:var(--text)}.rb-meta{font-size:11px;color:var(--muted);margin-top:2px}.rb-actions{display:flex;gap:6px;flex-shrink:0}.rb-restore{font-size:11px;padding:5px 11px;border-radius:6px;border:1px solid var(--border);background:var(--s2);color:var(--text);cursor:pointer;font-weight:600}.rb-restore:active{background:var(--border)}.rb-forever{font-size:11px;padding:5px 11px;border-radius:6px;border:1px solid #fca5a5;background:#fff1f2;color:#ef4444;cursor:pointer;font-weight:600}.rb-forever:active{background:#fca5a5}.rb-empty{padding:40px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px}
 .card-chooser-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center}
 .card-chooser-overlay.active{display:flex}
 .card-chooser-sheet{background:var(--bg);border-radius:18px 18px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;display:flex;flex-direction:column;gap:10px}
@@ -294,6 +294,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
   <div class="ns">
     <button class="ni" onclick="showPage('custom-filter')"><span style="width:16px;text-align:center">⚙</span>Custom filter</button>
   </div>
+  <div class="ndiv"></div>
+  <div class="ns">
+    <button class="ni" onclick="showPage('recycle')"><span style="width:16px;text-align:center">🗑</span>Recycle Bin</button>
+  </div>
   <div class="sf">Systems R&A (M) Sdn Bhd<br>Johor Bahru · Est. 1985<br>HVAC Design &amp; Build</div>
 </nav>
 
@@ -306,6 +310,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 </div>
 
 <!-- DASHBOARD -->
+<div class="page" id="page-recycle"><div class="ph"><div><div class="pt">Recycle Bin</div><div class="ps">Soft-deleted leads — restore or delete forever</div></div></div><div class="card" style="padding:0;overflow:hidden"><div id="rbody"></div></div></div>
 <div class="page active" id="page-dashboard">
   <div class="ph"><div><div class="pt">Pipeline dashboard</div><div class="ps" id="dash-date"></div></div><button class="btn bp" onclick="showPage('new')">+ Log enquiry</button></div>
   <div class="metrics" id="dash-metrics"></div>
@@ -334,7 +339,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
     <button class="fbt" onclick="setMF('Won',this)">Won</button>
     <div class="sw" style="margin-left:auto"><span class="sic">⌕</span><input class="si" id="msearch" placeholder="Search..." oninput="renderMaster()"></div>
   </div>
-  <div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Status</th><th>Quote no.</th><th>F/U</th><th>Next action</th></tr></thead><tbody id="mbody"></tbody></table></div></div>
+  <div class="tp"><div class="tw"><table class="tbl"><thead><tr><th>Client</th><th>Source</th><th>Industry</th><th>Solution</th><th>Div</th><th>Assigned</th><th>Priority</th><th>Status</th><th>Quote no.</th><th>F/U</th><th>Next action</th><th class="td-trash"></th></tr></thead><tbody id="mbody"></tbody></table></div></div>
 </div>
 
 <!-- KANBAN -->
@@ -592,6 +597,7 @@ function showPage(id){
   });
   if(id==='dashboard')renderDash();
   else if(id==='master')renderMaster();
+  else if(id==='recycle')renderRecycle();
   else if(id==='kanban')renderKanban();
   else if(id==='quotes'){renderQuotes();if(!quotes.length)loadQuotes();}
   else if(id==='elson')renderTeam('e','Elson');
@@ -678,7 +684,7 @@ function renderDash(){
 function setMF(f,btn){mf=f;document.querySelectorAll('#mf .fbt').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderMaster();}
 function renderMaster(){
   var q=(document.getElementById('msearch')?.value||'').toLowerCase();
-  var f=leads.filter(function(l){return lv(l,'Status')!=='Archived';});
+  var f=leads.filter(function(l){return lv(l,'Status')!=='Archived'&&lv(l,'Deleted')!=='1';});
   if(mf==='Hot')f=f.filter(function(l){return lv(l,'Priority')==='Hot';});
   else if(mf==='Warm')f=f.filter(function(l){return lv(l,'Priority')==='Warm';});
   else if(mf==='active')f=f.filter(isActive);
@@ -686,7 +692,7 @@ function renderMaster(){
   else if(mf==='Won')f=f.filter(function(l){return lv(l,'Status')==='Won';});
   if(q)f=f.filter(function(l){return(lv(l,'Client name')+lv(l,'Contact person & number')+lv(l,'Problem statement')).toLowerCase().includes(q);});
   document.getElementById('mbody').innerHTML=f.length?f.map(function(l){
-    return '<tr onclick="openModal(\''+lv(l,'ID')+'\')"><td><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Source channel')+'</td><td style="font-size:12px;color:var(--muted)">'+lv(l,'Industry')+'</td><td style="font-size:12px;color:var(--muted)">'+ss(lv(l,'Solution type'))+'</td><td>'+db(lv(l,'Division'))+'</td><td>'+ab(lv(l,'Assigned to'))+'</td><td>'+pb(lv(l,'Priority'))+'</td><td>'+sb(lv(l,'Status'))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);text-align:center">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted)">'+(lv(l,'Next action date')||'—')+'</td></tr>';
+    var _id=lv(l,'ID');return '<tr><td onclick="openModal(\''+_id+'\')"><div class="tn">'+lv(l,'Client name')+(isOD(l)?'<span class="ot">OVERDUE</span>':'')+'</div><div class="ts">'+lv(l,'Contact person & number')+'</div></td><td style="font-size:12px;color:var(--muted)" onclick="openModal(\''+_id+'\')">'+(lv(l,'Source channel'))+'</td><td style="font-size:12px;color:var(--muted)" onclick="openModal(\''+_id+'\')">'+(lv(l,'Industry'))+'</td><td style="font-size:12px;color:var(--muted)" onclick="openModal(\''+_id+'\')">'+(ss(lv(l,'Solution type')))+'</td><td onclick="openModal(\''+_id+'\')">'+(db(lv(l,'Division')))+'</td><td onclick="openModal(\''+_id+'\')">'+(ab(lv(l,'Assigned to')))+'</td><td onclick="openModal(\''+_id+'\')">'+(pb(lv(l,'Priority')))+'</td><td onclick="openModal(\''+_id+'\')">'+(sb(lv(l,'Status')))+'</td><td style="font-size:12px;color:var(--muted);font-family:var(--mono)" onclick="openModal(\''+_id+'\')">'+(lv(l,'Quotation no.')||'—')+'</td><td style="font-size:12px;color:var(--muted);text-align:center" onclick="openModal(\''+_id+'\')">'+(lv(l,'Follow-up count')||0)+'</td><td style="font-size:12px;color:var(--muted)" onclick="openModal(\''+_id+'\')">'+(lv(l,'Next action date')||'—')+'</td><td class="td-trash"><button class="btn-trash" onclick="trashLead(\''+_id+'\')" title="Move to Recycle Bin">🗑</button></td></tr>';
   }).join(''):'<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--muted);font-family:var(--mono)">No leads found</td></tr>';
 }
 
@@ -1340,6 +1346,73 @@ function fallbackCopy(text, cb){
     if (e.target === this) cardChooserClose();
   });
   // ────────────────────────────────────────────────────────
+
+  // ── Recycle Bin ─────────────────────────────────────────────
+  function trashLead(id) {
+    if (!confirm('Move this lead to Recycle Bin?')) return;
+    var l = leads.find(function(x){ return lv(x,'ID') === String(id); });
+    if (!l) return;
+    l['Deleted'] = '1';
+    apiPost('updateLead', {ID: id, Deleted: '1'}).then(function(r){
+      renderMaster();
+      toast('Moved to Recycle Bin');
+    }).catch(function(){ toast('Error — please retry'); });
+  }
+
+  function renderRecycle() {
+    var deleted = leads.filter(function(l){ return lv(l,'Deleted') === '1'; });
+    var el = document.getElementById('rbody');
+    if (!el) return;
+    if (!deleted.length) {
+      el.innerHTML = '<div class="rb-empty">🗑 Recycle Bin is empty</div>';
+      return;
+    }
+    el.innerHTML = deleted.map(function(l) {
+      var id = lv(l,'ID');
+      return '<div class="rb-row">' +
+        '<div class="rb-info">' +
+          '<div class="rb-name">' + lv(l,'Client name') + '</div>' +
+          '<div class="rb-meta">' + lv(l,'Status') + ' · ' + lv(l,'Assigned to') + ' · ' + (lv(l,'Source channel')||'') + '</div>' +
+        '</div>' +
+        '<div class="rb-actions">' +
+          '<button class="rb-restore" onclick="restoreLead(\'' + id + '\')">↩ Restore</button>' +
+          '<button class="rb-forever" onclick="deleteForever(\'' + id + '\')">✕ Delete</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function restoreLead(id) {
+    var l = leads.find(function(x){ return lv(x,'ID') === String(id); });
+    if (!l) return;
+    l['Deleted'] = '';
+    apiPost('updateLead', {ID: id, Deleted: ''}).then(function(r){
+      renderRecycle();
+      toast('Lead restored');
+    }).catch(function(){ toast('Error — please retry'); });
+  }
+
+  function deleteForever(id) {
+    if (!confirm('Permanently delete? This cannot be undone.')) return;
+    var idx = leads.findIndex(function(x){ return lv(x,'ID') === String(id); });
+    if (idx === -1) return;
+    var removed = leads.splice(idx, 1)[0];
+    apiGet('deleteLead&data=' + encodeURIComponent(id)).then(function(r){
+      if (r && r.ok) {
+        renderRecycle();
+        toast('Permanently deleted');
+      } else {
+        leads.splice(idx, 0, removed);
+        renderRecycle();
+        toast('Delete failed — Apps Script not updated yet');
+      }
+    }).catch(function(){
+      leads.splice(idx, 0, removed);
+      renderRecycle();
+      toast('Delete failed — check connection');
+    });
+  }
+  // ─────────────────────────────────────────────────────────────
 </script>
 
 <!-- GLOBAL EDIT MODAL -->
