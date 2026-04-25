@@ -220,6 +220,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .card-slot-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:var(--mono)}
 .card-upload-area{border:2px dashed var(--border);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--s2);position:relative}
 .card-upload-area:hover,.card-upload-area.drag-over{border-color:var(--b2);background:var(--bg)}
+.card-chooser-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center}
+.card-chooser-overlay.active{display:flex}
+.card-chooser-sheet{background:var(--bg);border-radius:18px 18px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;display:flex;flex-direction:column;gap:10px}
+.card-chooser-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:center;margin-bottom:4px}
+.card-chooser-btn{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:var(--s2);cursor:pointer;font-size:15px;font-weight:500;color:var(--text);width:100%;text-align:left}
+.card-chooser-btn:active{background:var(--border)}
+.card-chooser-btn .btn-icon{font-size:22px;width:32px;text-align:center}
+.card-chooser-cancel{margin-top:4px;padding:12px;border-radius:12px;border:none;background:var(--s2);color:var(--muted);font-size:15px;font-weight:600;cursor:pointer;width:100%}
 .card-upload-icon{font-size:22px;margin-bottom:4px}
 .card-upload-label{font-size:11px;color:var(--muted);line-height:1.4}
 .card-upload-label strong{color:var(--text);display:block;margin-bottom:2px}
@@ -384,13 +392,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 
       <!-- Business card upload — Front & Back -->
       <input type="file" id="card-input-1" class="card-hidden-input" accept="image/*">
+      <input type="file" id="card-input-1-cam" class="card-hidden-input" accept="image/*" capture="environment">
       <input type="file" id="card-input-2" class="card-hidden-input" accept="image/*">
+      <input type="file" id="card-input-2-cam" class="card-hidden-input" accept="image/*" capture="environment">
+      <!-- Card upload chooser sheet -->
+      <div class="card-chooser-overlay" id="card-chooser">
+        <div class="card-chooser-sheet">
+          <div class="card-chooser-title">Upload business card</div>
+          <button class="card-chooser-btn" onclick="cardChooserPick('cam')">
+            <span class="btn-icon">📷</span><span>Take Photo</span>
+          </button>
+          <button class="card-chooser-btn" onclick="cardChooserPick('gallery')">
+            <span class="btn-icon">🖼️</span><span>Choose from Gallery</span>
+          </button>
+          <button class="card-chooser-cancel" onclick="cardChooserClose()">Cancel</button>
+        </div>
+      </div>
       <div class="card-slots">
         <!-- Front -->
         <div>
           <div class="card-slot-label">Card 1</div>
           <div class="card-upload-area" id="card-area-1"
-               onclick="document.getElementById('card-input-1').click()"
+               onclick="cardChooserOpen(1)"
                ondragover="event.preventDefault();this.classList.add('drag-over')"
                ondragleave="this.classList.remove('drag-over')"
                ondrop="handleCardDrop(event,1)">
@@ -409,7 +432,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
         <div>
           <div class="card-slot-label">Card 2 <span style="font-weight:400;opacity:.6">(optional)</span></div>
           <div class="card-upload-area" id="card-area-2"
-               onclick="document.getElementById('card-input-2').click()"
+               onclick="cardChooserOpen(2)"
                ondragover="event.preventDefault();this.classList.add('drag-over')"
                ondragleave="this.classList.remove('drag-over')"
                ondrop="handleCardDrop(event,2)">
@@ -1295,6 +1318,28 @@ function fallbackCopy(text, cb){
   document.body.removeChild(ta);
 }
 
+
+  // ── Card upload chooser ──────────────────────────────────
+  var _cardChooserSlot = 1;
+  function cardChooserOpen(slot) {
+    _cardChooserSlot = slot;
+    document.getElementById('card-chooser').classList.add('active');
+  }
+  function cardChooserClose() {
+    document.getElementById('card-chooser').classList.remove('active');
+  }
+  function cardChooserPick(mode) {
+    cardChooserClose();
+    var id = mode === 'cam'
+      ? 'card-input-' + _cardChooserSlot + '-cam'
+      : 'card-input-' + _cardChooserSlot;
+    document.getElementById(id).click();
+  }
+  // Close if user taps the dark overlay (outside the sheet)
+  document.getElementById('card-chooser').addEventListener('click', function(e) {
+    if (e.target === this) cardChooserClose();
+  });
+  // ────────────────────────────────────────────────────────
 </script>
 
 <!-- GLOBAL EDIT MODAL -->
