@@ -864,6 +864,22 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 function closeMO(e){if(e.target===document.getElementById('modal'))closeModal();}
 
 // ── NEW LEAD ──────────────────────────────────────────
+function cpShow(slot,label){
+  var ov=document.getElementById('card-progress-'+slot);
+  var lb=document.getElementById('card-progress-label-'+slot);
+  if(lb)lb.textContent=label;
+  if(ov)ov.classList.add('active');
+}
+function cpDone(slot){
+  var lb=document.getElementById('card-progress-label-'+slot);
+  var sp=document.getElementById('card-spinner-'+slot);
+  if(lb)lb.textContent='✓ Done';
+  if(sp)sp.style.opacity='0';
+}
+function cpHide(slot){
+  var ov=document.getElementById('card-progress-'+slot);
+  if(ov)ov.classList.remove('active');
+}
 async function saveLead(){
   var name=document.getElementById('fn').value.trim();
   if(!name){alert('Please enter a client name.');return;}
@@ -899,22 +915,6 @@ async function saveLead(){
   var btn=document.getElementById('save-btn');
   btn.disabled=true;
   setSS('sync','Saving new lead...');
-  function cpShow(slot,label){
-    var ov=document.getElementById('card-progress-'+slot);
-    var lb=document.getElementById('card-progress-label-'+slot);
-    if(lb)lb.textContent=label;
-    if(ov)ov.classList.add('active');
-  }
-  function cpDone(slot){
-    var lb=document.getElementById('card-progress-label-'+slot);
-    var sp=document.getElementById('card-spinner-'+slot);
-    if(lb)lb.textContent='✓ Done';
-    if(sp)sp.style.opacity='0';
-  }
-  function cpHide(slot){
-    var ov=document.getElementById('card-progress-'+slot);
-    if(ov)ov.classList.remove('active');
-  }
   var totalCards=(cardDataURL?1:0)+(cardDataURL2?1:0);
   var cardNum=0;
   btn.textContent=totalCards?'Uploading cards…':'Saving…';
@@ -1178,6 +1178,11 @@ document.addEventListener('DOMContentLoaded', function(){
   [1,2].forEach(function(slot){
     var inp = document.getElementById('card-input-'+slot);
     if(inp) inp.addEventListener('change', function(){
+      if(this.files && this.files[0]) loadCardFile(this.files[0], slot);
+    });
+    // Also wire the camera-capture input for the same slot
+    var inpCam = document.getElementById('card-input-'+slot+'-cam');
+    if(inpCam) inpCam.addEventListener('change', function(){
       if(this.files && this.files[0]) loadCardFile(this.files[0], slot);
     });
     var area = document.getElementById('card-area-'+slot);
