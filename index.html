@@ -527,6 +527,7 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 var API='https://script.google.com/macros/s/AKfycbycZtgYhVs5znl-Qq1ihOTONMdlbTEixnZ7FxLU_vFIcLLT5KbfDbW7l0FcQ9bKvSZ0/exec';
 var leads=[],quotes=[],mf='all',qf='all',curId=null;
+var _syncLock=false; // prevent sync during critical operations
 var today=new Date().toISOString().slice(0,10);
 
 // ── API ──────────────────────────────────────────────
@@ -566,6 +567,7 @@ function setSS(st,msg){
 
 // ── SYNC FROM SHEETS ──────────────────────────────────
 async function syncNow(){
+  if(_syncLock){setSS('sync','Syncing...');return;}
   setSS('sync','Syncing from Google Sheets...');
   try{
     var d=await apiGet('getLeads');
@@ -1441,17 +1443,25 @@ function fallbackCopy(text, cb){
     if (idx === -1) return;
     var removed = leads.splice(idx, 1)[0];
     renderRecycle(); // optimistic — remove immediately from UI
+    _syncLock = true; // block auto-sync during delete
     apiGet('deleteLead&data=' + encodeURIComponent(id)).then(function(r){
       if (r && r.ok) {
         toast('Permanently deleted');
+        // Small delay then force a fresh sync to confirm Sheet state
+        setTimeout(function(){
+          _syncLock = false;
+          syncNow();
+        }, 1500);
       } else {
         // rollback
+        _syncLock = false;
         leads.push(removed);
         renderRecycle();
         toast('Delete failed: ' + (r && r.error ? r.error : 'Unknown error'));
       }
     }).catch(function(e){
       // rollback
+      _syncLock = false;
       leads.push(removed);
       renderRecycle();
       toast('Delete failed — check connection');
