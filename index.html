@@ -570,8 +570,14 @@ async function syncNow(){
   try{
     var d=await apiGet('getLeads');
     if(d.ok&&d.data){
+      // Preserve any Deleted flags set this session that Sheet may not have saved yet
+      var pendingDeleted={};
+      leads.forEach(function(l){ if(lv(l,'Deleted')==='1') pendingDeleted[lv(l,'ID')]=true; });
       leads=d.data;
-      setSS('ok','Synced — '+leads.length+' leads');
+      if(Object.keys(pendingDeleted).length){
+        leads.forEach(function(l){ if(pendingDeleted[lv(l,'ID')]) l['Deleted']='1'; });
+      }
+      setSS('ok','Synced — '+leads.filter(function(l){return !isDeleted(l);}).length+' leads');
       renderCurrent();
       buildSourceNav();
     } else {
