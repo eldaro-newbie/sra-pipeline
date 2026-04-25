@@ -233,7 +233,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
 .card-upload-label strong{color:var(--text);display:block;margin-bottom:2px}
 .card-preview{display:none;position:relative;margin-bottom:0}
 .card-preview img{width:100%;border-radius:8px;border:1px solid var(--border);max-height:160px;object-fit:contain;background:#f5f5f5}
-.card-preview-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;line-height:1}
+.card-preview-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;line-height:1}.card-progress-overlay{display:none;position:absolute;inset:0;border-radius:8px;background:rgba(0,0,0,.58);color:#fff;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:.03em;text-align:center;z-index:10}.card-progress-overlay.active{display:flex}.card-progress-spinner{width:26px;height:26px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:cpspin .7s linear infinite}@keyframes cpspin{to{transform:rotate(360deg)}}
 .card-hidden-input{display:none}
 .card-ocr-btn{width:100%;padding:8px;background:var(--b2);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);display:none;margin-top:8px}
 .card-ocr-btn:hover{opacity:.9}
@@ -431,6 +431,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
           <div class="card-preview" id="card-preview-1">
             <img id="card-img-1" src="" alt="Card 1">
             <button class="card-preview-remove" onclick="removeCard(1)" title="Remove">×</button>
+            <div class="card-progress-overlay" id="card-progress-1"><div class="card-progress-spinner" id="card-spinner-1"></div><div id="card-progress-label-1">Uploading…</div></div>
           </div>
         </div>
         <!-- Back -->
@@ -450,6 +451,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14
           <div class="card-preview" id="card-preview-2">
             <img id="card-img-2" src="" alt="Card 2">
             <button class="card-preview-remove" onclick="removeCard(2)" title="Remove">×</button>
+            <div class="card-progress-overlay" id="card-progress-2"><div class="card-progress-spinner" id="card-spinner-2"></div><div id="card-progress-label-2">Uploading…</div></div>
           </div>
         </div>
       </div>
@@ -888,24 +890,52 @@ async function saveLead(){
     'Internal notes':''
   };
   var btn=document.getElementById('save-btn');
-  btn.disabled=true;btn.textContent='Saving...';
+  btn.disabled=true;
   setSS('sync','Saving new lead...');
+  function cpShow(slot,label){
+    var ov=document.getElementById('card-progress-'+slot);
+    var lb=document.getElementById('card-progress-label-'+slot);
+    if(lb)lb.textContent=label;
+    if(ov)ov.classList.add('active');
+  }
+  function cpDone(slot){
+    var lb=document.getElementById('card-progress-label-'+slot);
+    var sp=document.getElementById('card-spinner-'+slot);
+    if(lb)lb.textContent='✓ Done';
+    if(sp)sp.style.opacity='0';
+  }
+  function cpHide(slot){
+    var ov=document.getElementById('card-progress-'+slot);
+    if(ov)ov.classList.remove('active');
+  }
+  var totalCards=(cardDataURL?1:0)+(cardDataURL2?1:0);
+  var cardNum=0;
+  btn.textContent=totalCards?'Uploading cards…':'Saving…';
   try{
     // Upload business card(s) to Drive
     if(cardDataURL || cardDataURL2){
       try{
         var links = [];
         if(cardDataURL){
+          cardNum++;
+          cpShow(1,'Uploading '+cardNum+' of '+totalCards+'…');
+          btn.textContent='Card '+cardNum+' of '+totalCards+'…';
           var l1 = await uploadCardToDrive(cardDataURL, lead['Client name'], lead['Contact name'], 1);
+          cpDone(1);
           if(l1) links.push(l1);
         }
         if(cardDataURL2){
+          cardNum++;
+          cpShow(2,'Uploading '+cardNum+' of '+totalCards+'…');
+          btn.textContent='Card '+cardNum+' of '+totalCards+'…';
           var l2 = await uploadCardToDrive(cardDataURL2, lead['Client name'], lead['Contact name'], 2);
+          cpDone(2);
           if(l2) links.push(l2);
         }
         if(links.length) lead['Business card'] = links.join(' | ');
-      } catch(e){ console.warn('Drive upload failed:', e); }
+      } catch(e){ console.warn('Drive upload failed:', e); cpHide(1); cpHide(2); }
     }
+    btn.textContent='Saving to Sheets…';
     var r=await apiPost('addLead',lead);
     if(r.ok){
       if(r.data)leads.unshift(r.data);
@@ -926,6 +956,7 @@ async function saveLead(){
 function clearForm(){
   ['fn','fcn','fph','fjt','fe','flo','fda','fno'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   removeCard(1); removeCard(2);
+  [1,2].forEach(function(s){cpHide&&cpHide(s);var ov=document.getElementById('card-progress-'+s);if(ov)ov.classList.remove('active');});
   ['fso','fi2','fsl','fdv','fas','fpr','fin'].forEach(function(id){var el=document.getElementById(id);if(el)el.selectedIndex=0;});
   var btn=document.getElementById('save-btn');if(btn){btn.disabled=false;btn.textContent='Save to Google Sheets';}
 }
